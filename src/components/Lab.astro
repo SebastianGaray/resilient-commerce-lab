@@ -1,0 +1,348 @@
+---
+import type { messages } from "../content/messages";
+import "../styles/global.css";
+
+type Copy = (typeof messages)[keyof typeof messages];
+interface Props {
+  copy: Copy;
+}
+const { copy } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const canonical = new URL(`${base}${copy.lang}/`, Astro.site);
+const alternate = new URL(`${base}${copy.alternate}/`, Astro.site);
+const patterns = Object.entries(copy.patterns);
+const faults = Object.entries(copy.faults);
+---
+
+<!doctype html>
+<html lang={copy.lang} data-theme="light" data-theme-preference="system">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={copy.intro} />
+    <meta name="theme-color" content="#fdf8f8" />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={copy.lang} href={canonical} />
+    <link rel="alternate" hreflang={copy.alternate} href={alternate} />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(`${base}en/`, Astro.site)}
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&family=Source+Serif+4:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{copy.title}</title>
+    <script is:inline>
+      (() => {
+        const key = "rcl-theme";
+        const saved = localStorage.getItem(key);
+        const preference =
+          saved === "light" || saved === "dark" ? saved : "system";
+        const dark = matchMedia("(prefers-color-scheme: dark)");
+        const theme =
+          preference === "system"
+            ? dark.matches
+              ? "dark"
+              : "light"
+            : preference;
+        document.documentElement.dataset.themePreference = preference;
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body data-locale={copy.lang}>
+    <a class="skip-link" href="#simulator">{copy.skip}</a>
+    <header class="site-header">
+      <a class="identity" href={`${base}${copy.lang}/`} aria-current="page"
+        >{copy.title}</a
+      >
+      <div class="utilities">
+        <details class="disclosure" data-theme-control>
+          <summary aria-label={copy.theme}
+            ><span class="theme-icon" aria-hidden="true">◐</span><span
+              data-theme-current>{copy.system}</span
+            ></summary
+          >
+          <div class="menu theme-menu" role="group" aria-label={copy.theme}>
+            {
+              [copy.system, copy.light, copy.dark].map((label, index) => (
+                <button
+                  type="button"
+                  data-theme-value={["system", "light", "dark"][index]}
+                  aria-pressed="false"
+                >
+                  {label}
+                </button>
+              ))
+            }
+          </div>
+        </details>
+        <a
+          class="locale"
+          href={alternate.pathname}
+          hreflang={copy.alternate}
+          aria-label={`${copy.lang.toUpperCase()} / ${copy.alternate.toUpperCase()}`}
+          ><strong>{copy.lang.toUpperCase()}</strong><span
+            class="locale-separator"
+            aria-hidden="true"
+          >
+            /
+          </span><span>{copy.alternate.toUpperCase()}</span></a
+        >
+        <a
+          class="icon-link"
+          href="https://github.com/SebastianGaray/resilient-commerce-lab"
+          aria-label={copy.repository}>GitHub ↗</a
+        >
+        <details class="disclosure nav-menu">
+          <summary>{copy.menu}</summary>
+          <nav class="menu" aria-label={copy.menu}>
+            <a href="#simulator">{copy.controls}</a><a href="#observability"
+              >{copy.metrics}</a
+            ><a href="#production">{copy.production}</a>
+            <a href="https://sebastiangaray.github.io/">{copy.portfolio}</a>
+          </nav>
+        </details>
+      </div>
+    </header>
+    <main>
+      <section class="intro">
+        <p class="eyebrow">{copy.disclaimer}</p><h1>{copy.title}</h1><p>
+          {copy.intro}
+        </p>
+      </section>
+      <section
+        id="simulator"
+        class="workspace"
+        aria-labelledby="controls-title"
+      >
+        <form class="controls panel" data-controls>
+          <div class="section-heading">
+            <p class="eyebrow">01</p><h2 id="controls-title">
+              {copy.controls}
+            </h2>
+          </div>
+          <label
+            >{copy.traffic}<output data-rate-output>24</output><input
+              name="rate"
+              type="range"
+              min="4"
+              max="100"
+              value="24"
+            /></label
+          >
+          <label
+            >{copy.pattern}<select name="pattern"
+              >{
+                patterns.map(([value, label]) => (
+                  <option value={value}>{label}</option>
+                ))
+              }</select
+            ></label
+          >
+          <label
+            >{copy.seed}<input
+              name="seed"
+              type="number"
+              min="1"
+              max="999999"
+              value="42"
+            /></label
+          >
+          <label
+            >{copy.fault}<select name="fault"
+              >{
+                faults.map(([value, label]) => (
+                  <option value={value}>{label}</option>
+                ))
+              }</select
+            ></label
+          >
+          <label
+            >{copy.intensity}<output data-intensity-output>0%</output><input
+              name="intensity"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+            /></label
+          >
+          <fieldset>
+            <legend>{copy.resilience}</legend>
+            <label class="check"
+              ><input name="cache" type="checkbox" checked />{copy.cache}</label
+            >
+            <label
+              >{copy.timeout}<select name="timeout"
+                ><option value="300">300 ms</option><option value="650" selected
+                  >650 ms</option
+                ><option value="1200">1200 ms</option></select
+              ></label
+            >
+            <label
+              >{copy.retries}<select name="retries"
+                ><option value="0">0</option><option value="1" selected
+                  >1</option
+                ><option value="2">2</option></select
+              ></label
+            >
+            <label class="check"
+              ><input name="jitter" type="checkbox" checked />{
+                copy.jitter
+              }</label
+            >
+            <label class="check"
+              ><input name="circuit" type="checkbox" checked />{
+                copy.circuit
+              }</label
+            >
+            <label
+              >{copy.limit}<input
+                name="limit"
+                type="number"
+                min="1"
+                max="120"
+                value="48"
+              /></label
+            >
+            <label class="check"
+              ><input name="idempotency" type="checkbox" checked />{
+                copy.idempotency
+              }</label
+            >
+          </fieldset>
+          <button class="primary" type="submit">{copy.run}</button>
+        </form>
+        <div class="main-output">
+          <section
+            class="panel architecture"
+            aria-labelledby="architecture-title"
+          >
+            <div class="section-heading">
+              <p class="eyebrow">02</p><h2 id="architecture-title">
+                {copy.architecture}
+              </h2>
+            </div>
+            <svg
+              viewBox="0 0 780 360"
+              role="img"
+              aria-labelledby="diagram-title diagram-desc"
+            >
+              <title id="diagram-title">{copy.architecture}</title><desc
+                id="diagram-desc"
+                >Client to gateway and order service, then inventory, payment,
+                cache and asynchronous worker.</desc
+              >
+              <g class="edges"
+                ><path d="M120 180H220"></path><path d="M330 180H410"
+                ></path><path d="M520 180H650"></path><path d="M465 140V75H650"
+                ></path><path d="M465 220V290H650"></path></g
+              >
+              <g class="nodes"
+                ><g transform="translate(20 145)"
+                  ><rect width="100" height="70"></rect><text x="50" y="40"
+                    >Client</text
+                  ></g
+                ><g transform="translate(220 145)"
+                  ><rect width="110" height="70"></rect><text x="55" y="32"
+                    >API</text
+                  ><text x="55" y="50">Gateway</text></g
+                ><g transform="translate(410 145)"
+                  ><rect width="110" height="70"></rect><text x="55" y="32"
+                    >Order</text
+                  ><text x="55" y="50">Service</text></g
+                ><g transform="translate(650 35)"
+                  ><rect width="110" height="70"></rect><text x="55" y="32"
+                    >Inventory</text
+                  ><text x="55" y="50">Service</text></g
+                ><g transform="translate(650 145)"
+                  ><rect width="110" height="70"></rect><text x="55" y="32"
+                    >Payment</text
+                  ><text x="55" y="50">Service</text></g
+                ><g transform="translate(650 255)"
+                  ><rect width="110" height="70"></rect><text x="55" y="32"
+                    >Queue</text
+                  ><text x="55" y="50">Worker</text></g
+                ></g
+              >
+            </svg>
+            <div class="activity" aria-live="polite">
+              <strong>{copy.activity}</strong><ul data-activity></ul>
+            </div>
+          </section>
+          <section class="panel customer" aria-labelledby="customer-title">
+            <div>
+              <p class="eyebrow">{copy.simulated}</p><h2 id="customer-title">
+                {copy.customer}
+              </h2>
+            </div><div data-customer-state class="customer-card"></div>
+          </section>
+        </div>
+      </section>
+      <section id="observability" class="observability">
+        <div class="section-heading">
+          <p class="eyebrow">03</p><h2>{copy.metrics}</h2>
+        </div>
+        <div class="metrics" data-metrics></div>
+        <div class="two-column">
+          <section class="panel">
+            <h3>{copy.comparison}</h3><div class="comparison" data-comparison>
+            </div>
+          </section><section class="panel">
+            <h3>{copy.traces}</h3><div data-traces>{copy.traceEmpty}</div>
+          </section>
+        </div>
+      </section>
+      <section id="production" class="production">
+        <div class="section-heading">
+          <p class="eyebrow">04</p><h2>{copy.production}</h2>
+        </div><p>{copy.contextIntro}</p>
+        <div class="context-grid">
+          {
+            copy.contexts.map(
+              ([name, simulation, production, tradeoff, omitted]) => (
+                <details class="panel">
+                  <>
+                    <summary>{name}</summary>
+                    <dl>
+                      <>
+                        <dt>
+                          {copy.lang === "en"
+                            ? "In this simulation"
+                            : "En esta simulación"}
+                        </dt>
+                        <dd>{simulation}</dd>
+                        <dt>
+                          {copy.lang === "en"
+                            ? "In a production system"
+                            : "En un sistema de producción"}
+                        </dt>
+                        <dd>{production}</dd>
+                        <dt>{copy.lang === "en" ? "Trade-off" : "Costo"}</dt>
+                        <dd>{tradeoff}</dd>
+                        <dt>
+                          {copy.lang === "en"
+                            ? "Not modeled here"
+                            : "No modelado aquí"}
+                        </dt>
+                        <dd>{omitted}</dd>
+                      </>
+                    </dl>
+                  </>
+                </details>
+              ),
+            )
+          }
+        </div>
+      </section>
+    </main>
+    <script>
+      import "../scripts/lab";
+    </script>
+  </body>
+</html>
