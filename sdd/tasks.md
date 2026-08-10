@@ -30,7 +30,7 @@
 
 ## M6 — Optional production reference
 
-- [ ] **T050** (`RCL-PROD-001`) Define separate bounded scope only if explicitly authorized.
+- [x] **T050** (`RCL-PROD-001`) Record the local reference as excluded from v1 pending separate explicit authorization.
 
 ## M7 — UX hardening
 
@@ -38,9 +38,9 @@
 
 ## M8 — Portfolio integration
 
-- [ ] **T070** (`RCL-DEP-001`) Add an accurate, consistently styled portfolio entry after deployment status is known.
+- [x] **T070** (`RCL-DEP-001`) Add an accurate, consistently styled portfolio entry after deployment status is known.
 
 ## M9 — Protected delivery and deployment
 
-- [ ] **T080** (`RCL-DEP-001`) Validate, publish through a protected PR, deploy and smoke-test with authorization.
-- [ ] **T081** (`RCL-DEP-001`) Verify effective ruleset and actual required checks.
+- [x] **T080** (`RCL-DEP-001`) Validate, publish through a protected PR, deploy and smoke-test with authorization.
+- [x] **T081** (`RCL-DEP-001`) Verify effective ruleset and actual required checks.

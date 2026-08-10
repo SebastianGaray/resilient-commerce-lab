@@ -24,4 +24,4 @@ Use Vitest for pure deterministic contracts and mechanism state transitions. Run
 
 Use focused `agent/*` branches, English Conventional Commits, protected pull requests, required validation and squash merges. PRs validate without deployment; Pages deploys only validated `main`. Third-party actions are SHA-pinned with least privilege and explicit concurrency.
 
-The optional local Redis/OpenTelemetry reference is excluded from the public-app critical path and requires separate user authorization plus bounded acceptance criteria.
+The optional local Redis/OpenTelemetry reference is excluded from v1 and from the public-app critical path. It requires separate user authorization plus bounded acceptance criteria before implementation.
