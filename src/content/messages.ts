@@ -1,4 +1,4 @@
-export type Locale = "en" | "es";
+export type Locale = "en" | "es"
 
 const en = {
   lang: "en",
@@ -18,9 +18,7 @@ const en = {
   controls: "Simulation controls",
   traffic: "Traffic scenario",
   scaling: "Capacity scaling",
-  maxInstances: "Maximum horizontal instances",
   noTimeout: "No timeout guard — 5,000 ms",
-  seed: "Seed",
   run: "Run simulation",
   playback: {
     play: "Play",
@@ -28,7 +26,7 @@ const en = {
     mode: "Playback mode",
     single: "Single run",
     continuous: "Continuous",
-    loopNote: "Continuous repeats the same seeded run.",
+    loopNote: "Continuous repeats the same deterministic run.",
     time: "Virtual playback time",
     legend: "Flow legend",
   },
@@ -53,21 +51,16 @@ const en = {
     controlsItems: [
       [
         "Traffic scenario",
-        "Selects a deterministic low day, normal day, CyberDay sale or denial-of-service demand curve.",
+        "Selects a deterministic demand curve and active-client population: 50 users on a low day, 250 on a normal day, 3,000 during CyberDay or 10,000 automated clients in the denial-of-service scenario.",
       ],
       [
         "Capacity scaling",
-        "None keeps one standard instance. Horizontal adds instances around a 70% CPU target up to the selected maximum. Vertical keeps one instance with 2× CPU and memory capacity.",
-      ],
-      [
-        "Maximum horizontal instances",
-        "Caps automatic replicas per service. A lower cap bounds capacity cost but can leave overload unresolved.",
+        "Selects one capacity plan: one standard instance, horizontal scaling capped at 2, 4 or 8 pods, or one vertical instance with 2× CPU and memory.",
       ],
       [
         "Capacity footprint",
         "Counts standard instance equivalents across visible services. It exposes the scaling tradeoff without estimating provider-specific prices.",
       ],
-      ["Seed", "Reproduces the same generated latencies and outcomes."],
       ["Cache", "Lets browse requests avoid an inventory call on a hit."],
       [
         "Timeout",
@@ -110,7 +103,7 @@ const en = {
       ],
       [
         "Vertical",
-        "One instance receives a simplified 2× CPU and memory allocation; real VPA is periodic and recommendation-based.",
+        "One instance receives a simplified 2× CPU and memory allocation. Real VPA is periodic and recommendation-based.",
       ],
       [
         "Latency and errors",
@@ -118,12 +111,12 @@ const en = {
       ],
       [
         "Memory",
-        "An educational estimate from baseline memory, CPU pressure and worker queue depth; it is not a runtime measurement.",
+        "An educational estimate from baseline memory, CPU pressure and worker queue depth. It is not a runtime measurement.",
       ],
     ],
     architectureTitle: "How to read the diagram",
     architectureIntro:
-      "Nodes and connections come from the controls. Bubbles show where resilience mechanisms act; moving shapes are a bounded sample. Offset green, red, amber and gray paint shows weighted outcomes from the latest two virtual seconds and fades over time. Resource text reports peak simulated CPU, memory and instances without adding infrastructure nodes.",
+      "Nodes and connections come from the controls. Bubbles show where resilience mechanisms act. Moving shapes are a bounded sample. Offset green, red, amber and gray paint shows weighted outcomes from the latest two virtual seconds and fades over time. Resource text follows the current playback second without adding infrastructure nodes.",
     sourcesTitle: "Model sources",
     sources: [
       [
@@ -149,14 +142,16 @@ const en = {
     ],
   },
   scenarios: {
-    low: "Low day",
-    normal: "Normal day",
-    cyber: "CyberDay sale",
-    dos: "Denial-of-service attack",
+    low: "Low day — 50 users",
+    normal: "Normal day — 250 users",
+    cyber: "CyberDay sale — 3,000 users",
+    dos: "Denial-of-service — 10,000 automated clients",
   },
   scalingOptions: {
     none: "No scaling",
-    horizontal: "Automatic horizontal",
+    "horizontal-2": "Horizontal — maximum 2 pods",
+    "horizontal-4": "Horizontal — maximum 4 pods",
+    "horizontal-8": "Horizontal — maximum 8 pods",
     vertical: "Vertical — 2× capacity",
   },
   groups: {
@@ -202,7 +197,7 @@ const en = {
       "Timeouts",
       "The model stops a dependency attempt at a threshold.",
       "Remote calls commonly use bounded connection and request timeouts.",
-      "A low threshold can cause premature failures; a high one holds resources longer.",
+      "A low threshold can cause premature failures. A high one holds resources longer.",
       "Network phases, adaptive policies and service-specific budgets.",
     ],
     [
@@ -221,7 +216,7 @@ const en = {
     ],
     [
       "Cache",
-      "Browse requests use a deterministic hit probability; misses continue to inventory and consume more capacity.",
+      "Browse requests use a deterministic hit probability. Misses continue to inventory and consume more capacity.",
       "Caches can reduce latency and dependency load.",
       "Cached data may be stale and invalidation remains application-specific.",
       "Eviction, consistency, stampedes and distributed topology.",
@@ -235,7 +230,7 @@ const en = {
     ],
     [
       "Queues and idempotency",
-      "Successful orders enqueue work; idempotency suppresses a simplified duplicate effect.",
+      "Successful orders enqueue work. Idempotency suppresses a simplified duplicate effect.",
       "Queues absorb asynchronous work and idempotency keys make mutation retries safer.",
       "Backlogs delay completion and deduplication needs bounded storage.",
       "Delivery guarantees, poison messages and durable transaction boundaries.",
@@ -248,7 +243,7 @@ const en = {
       "This output is not OTLP and has no production telemetry source.",
     ],
   ],
-} as const;
+} as const
 
 const es = {
   ...en,
@@ -265,9 +260,7 @@ const es = {
   controls: "Controles de simulación",
   traffic: "Escenario de tráfico",
   scaling: "Escalado de capacidad",
-  maxInstances: "Máximo de instancias horizontales",
   noTimeout: "Sin protección de timeout — 5.000 ms",
-  seed: "Semilla",
   run: "Ejecutar simulación",
   playback: {
     play: "Reproducir",
@@ -275,7 +268,7 @@ const es = {
     mode: "Modo de reproducción",
     single: "Una ejecución",
     continuous: "Continuo",
-    loopNote: "El modo continuo repite la misma ejecución y semilla.",
+    loopNote: "El modo continuo repite la misma ejecución determinista.",
     time: "Tiempo virtual de reproducción",
     legend: "Leyenda del flujo",
   },
@@ -300,21 +293,16 @@ const es = {
     controlsItems: [
       [
         "Escenario de tráfico",
-        "Selecciona una curva determinista de día bajo, día normal, venta CyberDay o ataque de denegación de servicio.",
+        "Selecciona una curva determinista y población activa: 50 usuarios en día bajo, 250 en día normal, 3.000 durante CyberDay o 10.000 clientes automatizados en denegación de servicio.",
       ],
       [
         "Escalado de capacidad",
-        "Sin escalado mantiene una instancia estándar. Horizontal agrega instancias alrededor de 70% de CPU hasta el máximo elegido. Vertical mantiene una instancia con 2× capacidad de CPU y memoria.",
-      ],
-      [
-        "Máximo de instancias horizontales",
-        "Acota las réplicas automáticas por servicio. Un máximo menor limita el coste de capacidad, pero puede dejar sobrecarga sin resolver.",
+        "Selecciona un plan de capacidad: una instancia estándar, escalado horizontal acotado a 2, 4 u 8 pods, o una instancia vertical con 2× CPU y memoria.",
       ],
       [
         "Huella de capacidad",
         "Cuenta equivalentes de instancia estándar entre los servicios visibles. Expone el compromiso del escalado sin estimar precios de un proveedor.",
       ],
-      ["Semilla", "Reproduce las mismas latencias y resultados generados."],
       [
         "Caché",
         "Permite que consultas eviten inventario cuando hay un acierto.",
@@ -360,7 +348,7 @@ const es = {
       ],
       [
         "Vertical",
-        "Una instancia recibe una asignación simplificada de CPU y memoria 2×; un VPA real actúa periódicamente y usa recomendaciones.",
+        "Una instancia recibe una asignación simplificada de CPU y memoria 2×. Un VPA real actúa periódicamente y usa recomendaciones.",
       ],
       [
         "Latencia y errores",
@@ -368,12 +356,12 @@ const es = {
       ],
       [
         "Memoria",
-        "Estimación educativa desde memoria base, presión de CPU y profundidad de cola del worker; no es una medición de runtime.",
+        "Estimación educativa desde memoria base, presión de CPU y profundidad de cola del worker. No es una medición de runtime.",
       ],
     ],
     architectureTitle: "Cómo leer el diagrama",
     architectureIntro:
-      "Los nodos y conexiones provienen de los controles. Las burbujas muestran dónde actúan los mecanismos de resiliencia; las figuras móviles son una muestra acotada. La pintura verde, roja, ámbar y gris desplazada muestra resultados ponderados de los últimos dos segundos virtuales y se desvanece. El texto de recursos informa CPU, memoria e instancias simuladas máximas sin agregar nodos de infraestructura.",
+      "Los nodos y conexiones provienen de los controles. Las burbujas muestran dónde actúan los mecanismos de resiliencia. Las figuras móviles son una muestra acotada. La pintura verde, roja, ámbar y gris desplazada muestra resultados ponderados de los últimos dos segundos virtuales y se desvanece. El texto de recursos sigue el segundo actual del playback sin agregar nodos de infraestructura.",
     sourcesTitle: "Fuentes del modelo",
     sources: [
       [
@@ -399,14 +387,16 @@ const es = {
     ],
   },
   scenarios: {
-    low: "Día bajo",
-    normal: "Día normal",
-    cyber: "Venta CyberDay",
-    dos: "Ataque de denegación de servicio",
+    low: "Día bajo — 50 usuarios",
+    normal: "Día normal — 250 usuarios",
+    cyber: "Venta CyberDay — 3.000 usuarios",
+    dos: "Denegación de servicio — 10.000 clientes automatizados",
   },
   scalingOptions: {
     none: "Sin escalado",
-    horizontal: "Horizontal automático",
+    "horizontal-2": "Horizontal — máximo 2 pods",
+    "horizontal-4": "Horizontal — máximo 4 pods",
+    "horizontal-8": "Horizontal — máximo 8 pods",
     vertical: "Vertical — capacidad 2×",
   },
   groups: {
@@ -453,7 +443,7 @@ const es = {
       "Timeouts",
       "El modelo detiene un intento al alcanzar un umbral.",
       "Las llamadas remotas suelen usar límites de conexión y solicitud.",
-      "Un límite bajo puede fallar antes de tiempo; uno alto retiene recursos.",
+      "Un límite bajo puede fallar antes de tiempo. Uno alto retiene recursos.",
       "Fases de red, políticas adaptativas y presupuestos por servicio.",
     ],
     [
@@ -472,7 +462,7 @@ const es = {
     ],
     [
       "Caché",
-      "Las consultas usan una probabilidad determinista de acierto; los fallos de caché continúan a inventario y consumen más capacidad.",
+      "Las consultas usan una probabilidad determinista de acierto. Los fallos de caché continúan a inventario y consumen más capacidad.",
       "La caché puede reducir latencia y carga de dependencias.",
       "Los datos pueden quedar obsoletos y la invalidación depende de la aplicación.",
       "Evicción, consistencia, estampidas y topología distribuida.",
@@ -486,7 +476,7 @@ const es = {
     ],
     [
       "Colas e idempotencia",
-      "Los pedidos exitosos encolan trabajo; la idempotencia suprime un duplicado simplificado.",
+      "Los pedidos exitosos encolan trabajo. La idempotencia suprime un duplicado simplificado.",
       "Las colas absorben trabajo asíncrono y las claves hacen más seguros los reintentos.",
       "El backlog retrasa resultados y deduplicar requiere almacenamiento acotado.",
       "Garantías de entrega, mensajes tóxicos y límites transaccionales.",
@@ -499,6 +489,6 @@ const es = {
       "Esta salida no es OTLP ni proviene de telemetría productiva.",
     ],
   ],
-} as const;
+} as const
 
-export const messages = { en, es };
+export const messages = { en, es }

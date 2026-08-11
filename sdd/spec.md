@@ -13,18 +13,18 @@ The persistent label is **Simulation · Not production telemetry** / **Simulaci�
 ## Requirements
 
 - **RCL-SIM-001** Given the same seed, traffic scenario, scaling strategy and resilience controls, the model produces the same ordered events, resources, metrics and representative traces.
-- **RCL-TRAFFIC-001** Users select deterministic Low day, Normal day, CyberDay sale or denial-of-service demand curves with a bounded browse/cart/order mix.
-- **RCL-CAP-001** None, capped automatic horizontal and simplified 2× vertical scaling derive service CPU, memory, instances, latency and overload errors from demand relative to capacity. Horizontal exposes a user-selected maximum and relative capacity footprint.
+- **RCL-TRAFFIC-001** Users select deterministic Low day, Normal day, CyberDay sale or denial-of-service demand curves with a bounded browse/cart/order mix and visible educational populations of 50, 250, 3,000 or 10,000 active clients.
+- **RCL-CAP-001** One selector offers no scaling, horizontal limits of 2, 4 or 8 pods and simplified 2× vertical scaling. Service CPU, memory, instances, latency and overload errors derive from demand relative to capacity. Capacity remains empty before Play and follows the current simulation second afterward.
 - **RCL-RES-001** Cache, timeout, bounded retries, exponential backoff, deterministic jitter, circuit breaker, rate limiting and idempotency have causal, bounded models and visible trade-offs.
 - **RCL-OBS-001** Throughput, p50/p95/p99 latency, error rate, dependency rate, cache hit ratio, queue depth, timeout count, retry count and circuit state derive only from simulation events.
 - **RCL-TRACE-001** Representative traces expose request path, timing, status and correlation identifiers without claiming OpenTelemetry compatibility.
-- **RCL-CX-001** A labeled customer-experience preview derives normal, delayed, stale, limited, unavailable and payment-failure states from the same simulation result and presents one configuration-aware next step.
+- **RCL-CX-001** A labeled customer-experience preview derives normal, delayed, stale, limited, unavailable and payment-failure states from the same simulation result and presents multiple configuration-aware next moves with reasons.
 - **RCL-COMP-001** Baseline and current runs use identical scenario, scaling and seed, differing only in resilience controls.
 - **RCL-PROD-001** Each major mechanism explains what is simulated, common production use, trade-offs and omitted complexity with authoritative references.
 - **RCL-A11Y-001** The experience is semantic, keyboard usable, non-color-dependent, reduced-motion compatible and understandable without animation.
-- **RCL-I18N-001** `/en/` and `/es/` have equivalent routes, controls, content, metadata and preserved destinations; `/` redirects to English.
-- **RCL-PERF-001** Logical request volume never creates one DOM node per request; rendering is sampled and bounded.
-- **RCL-PLAY-001** Play starts or resumes a deterministic ten-second visual replay; Pause freezes it; Restart returns to virtual time zero. Virtual time always advances at 1× while orb travel uses a fixed 0.5× presentation speed. Single mode stops after one run and Continuous repeats the same seeded run with a visible explanation.
+- **RCL-I18N-001** `/en/` and `/es/` have equivalent routes, controls, content, metadata and preserved destinations. `/` redirects to English.
+- **RCL-PERF-001** Logical request volume never creates one DOM node per request. rendering is sampled and bounded.
+- **RCL-PLAY-001** Play starts or resumes a deterministic ten-second visual replay. Pause freezes it. Restart returns to virtual time zero. Virtual time always advances at 1× while orb travel uses a fixed 0.5× presentation speed. Single mode stops after one run and Continuous repeats the same seeded run with a visible explanation.
 - **RCL-TOPO-001** The diagram derives visible nodes, edges and mechanism annotations from existing controls. Capacity remains textual and does not add infrastructure nodes.
 - **RCL-FLOW-001** At most 12 simultaneous representative orbs communicate normal requests, successes, waiting/degradation, errors/timeouts, retries, limiting, cache hits and cache misses through color plus shape/border and a textual equivalent.
 - **RCL-SCALE-001** Traffic and rate-limit controls accept up to 1,000 requests per second while the simulation and DOM remain bounded.
@@ -43,6 +43,8 @@ The single-run playback must use the complete ten-second window without cutting 
 
 The initial configuration enables no optional resilience mechanisms. Preview and guidance remain hidden before playback evidence exists, then propose one next change from the observed pressure and current controls. Representative playback includes at least four successful Queue-bound orders when the simulation provides them. The legend sits immediately below the request diagram, before service capacity, and circuit-breaker annotations remain on dependency calls rather than Cache.
 
-Traffic scenarios never force errors. Seeded errors and latency arise only when modeled CPU demand exceeds service capacity after rate limiting, cache effects and selected scaling. Horizontal scaling follows the Kubernetes utilization-ratio form with a 70% target and eight-instance cap; vertical scaling is an explicitly simplified 2× allocation. Help links the official model sources.
+The deterministic seed remains internal. Scaling never reveals a second conditional selector. Interface copy and documentation contain no semicolons. JavaScript and TypeScript omit stylistic statement terminators. Syntax-required CSS and protocol separators are exempt.
 
-Rate limiting uses explicit presets: No limit — 1,000/s, Low — 50/s, Medium — 250/s and High — 500/s. Each edge retains at most four recent outcome layers for a two-second virtual window. Success, error, wait and limited layers use separate offset colors whose opacity and width represent weighted recent frequency; they decay without overwriting one another.
+Traffic scenarios never force errors. Seeded errors and latency arise only when modeled CPU demand exceeds service capacity after rate limiting, cache effects and selected scaling. Horizontal scaling follows the Kubernetes utilization-ratio form with a 70% target and eight-instance cap. vertical scaling is an explicitly simplified 2× allocation. Help links the official model sources.
+
+Rate limiting uses explicit presets: No limit — 1,000/s, Low — 50/s, Medium — 250/s and High — 500/s. Each edge retains at most four recent outcome layers for a two-second virtual window. Success, error, wait and limited layers use separate offset colors whose opacity and width represent weighted recent frequency. they decay without overwriting one another.

@@ -15,8 +15,8 @@ Completed and merged into `main` on 2026-08-10.
 - Kept scenarios limited to defining demand. Errors and latency are calculated from
   demand, service capacity, resilience controls and the selected scaling strategy.
 - Added selectable capacity scaling:
-  - none: one standard instance;
-  - horizontal: automatic scaling from 1 to 8 instances around a 70% utilization target;
+  - none: one standard instance.
+  - horizontal: automatic scaling from 1 to 8 instances around a 70% utilization target.
   - vertical: one instance with a simplified 2× CPU and memory allocation.
 - Added peak simulated CPU, memory, state and instance counts for each service without
   adding infrastructure nodes to the request diagram.
@@ -63,13 +63,13 @@ Completed and merged into `main` on 2026-08-10.
 Completed locally on branch `agent/playback-guidance-limits`:
 
 - normalize sampled event timing so half-speed orb motion remains visible throughout the
-  complete ten-second playback and is not cut off at the end;
-- replace separate Play, Pause and Restart buttons with one stateful Play/Pause action;
-- collapse the legend by default and consolidate it into four outcome categories;
-- add localized, configuration-aware next-step guidance beside the customer preview;
-- expose a horizontal per-service maximum of 2, 4 or 8 instances;
+  complete ten-second playback and is not cut off at the end.
+- replace separate Play, Pause and Restart buttons with one stateful Play/Pause action.
+- collapse the legend by default and consolidate it into four outcome categories.
+- add localized, configuration-aware next-step guidance beside the customer preview.
+- expose a horizontal per-service maximum of 2, 4 or 8 instances.
 - report a relative capacity footprint so the scaling tradeoff is visible without inventing
-  cloud prices;
+  cloud prices.
 - extend unit and browser coverage for timing, caps, recommendations and responsive behavior.
 
 Validation completed with formatting, lint, type checking, production build, 15 unit tests,
@@ -82,14 +82,32 @@ included in this iteration's commit.
 Completed on branch `agent/progressive-resilience-guidance`:
 
 - keep Queue and Worker, while reserving at least four representative successful orders in
-  playback so the asynchronous path is visible;
+  playback so the asynchronous path is visible.
 - start with no optional resilience mechanisms enabled and use 5,000 ms as the documented
-  unprotected timeout ceiling;
-- hide customer preview and next-step guidance until playback produces evidence;
-- propose one missing resilience or capacity action at a time when degradation appears;
-- move the compact legend immediately below the diagram and before service capacity;
-- anchor circuit breaker on the dependency-call path rather than near Cache;
+  unprotected timeout ceiling.
+- hide customer preview and next-step guidance until playback produces evidence.
+- propose one missing resilience or capacity action at a time when degradation appears.
+- move the compact legend immediately below the diagram and before service capacity.
+- anchor circuit breaker on the dependency-call path rather than near Cache.
 - extend unit and browser coverage for these behaviors before PR and merge.
 
 Validation completed with formatting, lint, type checking, production build, 16 unit tests,
 18 Playwright tests across desktop/mobile/320 px and an audit reporting 0 vulnerabilities.
+
+## Follow-up iteration — progressive capacity and recommendations
+
+Completed on branch `agent/progressive-capacity-recommendations`:
+
+- reveal simulated service capacity from per-second snapshots as playback advances
+- replace the conditional horizontal maximum control with one five-option scaling selector
+- remove seed from the interface while retaining a fixed deterministic internal seed
+- show each scenario's educational active-client population in the selector and help
+- replace one next move with a bounded list of applicable, reasoned recommendations
+- configure JavaScript and TypeScript formatting without stylistic semicolon terminators
+- remove semicolons from client copy and documentation while retaining grammar-required CSS
+  and protocol separators
+- extend unit and browser coverage before PR and merge
+
+Validation completed with formatting, lint, type checking, production build, 18 unit tests,
+18 Playwright tests across desktop/mobile/320 px and an audit reporting 0 vulnerabilities.
+No interactive browser was connected for an additional manual visual pass.
