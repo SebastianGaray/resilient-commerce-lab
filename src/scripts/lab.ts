@@ -1,6 +1,7 @@
 import {
   compare,
   defaultConfig,
+  type ResourceSnapshot,
   type SimulationConfig,
   type SimulationResult,
 } from "../domain/simulation";
@@ -142,15 +143,60 @@ function render(
           `<details class="trace"><summary><code>${trace.id}</code><span>${trace.kind}</span><strong>${trace.durationMs} ms · ${trace.outcome}</strong></summary><ol>${trace.spans.map((span) => `<li><span>${span.service}</span><code>+${span.startMs % 1000} ms / ${span.durationMs} ms</code><em>${span.detail} · ${span.status}</em></li>`).join("")}</ol></details>`,
       )
       .join("");
+
+  renderResources(
+    result.resources,
+    result.config.scaling,
+    result.config.controls.cache,
+  );
+}
+
+function renderResources(
+  resources: ResourceSnapshot[],
+  scaling: SimulationConfig["scaling"],
+  cacheEnabled: boolean,
+): void {
+  const container = document.querySelector<HTMLElement>("[data-resources]");
+  if (!container) return;
+  const serviceNames: Record<ResourceSnapshot["service"], string> = {
+    gateway: "API Gateway",
+    order: "Order Service",
+    cache: locale === "es" ? "Caché" : "Cache",
+    inventory: locale === "es" ? "Inventario" : "Inventory",
+    payment: locale === "es" ? "Pagos" : "Payment",
+    worker: "Worker",
+  };
+  const stateNames =
+    locale === "es"
+      ? { healthy: "saludable", busy: "ocupado", saturated: "saturado" }
+      : { healthy: "healthy", busy: "busy", saturated: "saturated" };
+  container.innerHTML = resources
+    .filter((item) => item.service !== "cache" || cacheEnabled)
+    .map((item) => {
+      const scaleText =
+        scaling === "horizontal"
+          ? `${item.instances} ${
+              locale === "es"
+                ? item.instances === 1
+                  ? "instancia"
+                  : "instancias"
+                : item.instances === 1
+                  ? "instance"
+                  : "instances"
+            }`
+          : scaling === "vertical"
+            ? `${locale === "es" ? "1 instancia · capacidad 2×" : "1 instance · 2× capacity"}`
+            : `${locale === "es" ? "1 instancia" : "1 instance"}`;
+      return `<article data-state="${item.state}"><strong>${serviceNames[item.service]}</strong><span>CPU ${item.cpu}% · ${locale === "es" ? "memoria" : "memory"} ${item.memory}%</span><small>${scaleText} · ${stateNames[item.state]}</small></article>`;
+    })
+    .join("");
 }
 
 function readConfig(): SimulationConfig {
   const config = defaultConfig();
-  config.requestsPerSecond = Number(selected("rate").value);
-  config.pattern = selected("pattern").value as typeof config.pattern;
+  config.scenario = selected("scenario").value as typeof config.scenario;
+  config.scaling = selected("scaling").value as typeof config.scaling;
   config.seed = Number(selected("seed").value);
-  config.fault.target = selected("fault").value as typeof config.fault.target;
-  config.fault.intensity = Number(selected("intensity").value);
   config.controls.cache = (selected("cache") as HTMLInputElement).checked;
   config.controls.timeoutMs = Number(selected("timeout").value);
   config.controls.retries = Number(selected("retries").value);
@@ -198,6 +244,7 @@ function renderTopology(): void {
   annotations.replaceChildren();
   const anchors: Record<string, [number, number]> = {
     limiter: [170, 132],
+    order: [445, 132],
     "order-inventory": [555, 126],
     "order-payment": [555, 226],
     "order-queue": [470, 250],
@@ -245,10 +292,6 @@ function localizeAnnotation(label: string): string {
     return `${locale === "es" ? "Circuito" : "Circuit breaker"}: ${label}`;
   if (label === "idempotent")
     return locale === "es" ? "Idempotencia" : "Idempotency";
-  if (label.endsWith("fault")) {
-    const intensity = label.split("%")[0];
-    return `${locale === "es" ? "Fallo" : "Fault"}: ${intensity}%`;
-  }
   return label;
 }
 
@@ -324,35 +367,6 @@ function renderTracePaint(): void {
     path.style.setProperty("--trace-width", String(4 + item.intensity * 9));
     layer.append(path);
   });
-  const summary = document.querySelector<HTMLElement>("[data-paint-summary]");
-  if (!summary) return;
-  if (paint.length === 0) {
-    summary.textContent =
-      locale === "es"
-        ? "Sin resultados recientes en las conexiones."
-        : "No recent connection outcomes.";
-    return;
-  }
-  const kindNames: Record<PaintKind, string> =
-    locale === "es"
-      ? {
-          success: "correctas",
-          error: "errores",
-          wait: "esperas",
-          limited: "limitadas",
-        }
-      : {
-          success: "successes",
-          error: "errors",
-          wait: "waits",
-          limited: "limited",
-        };
-  const details = [...paint]
-    .sort((a, b) => b.intensity - a.intensity)
-    .slice(0, 4)
-    .map((item) => `${item.edge}: ${item.count} ${kindNames[item.kind]}`)
-    .join(" · ");
-  summary.textContent = `${locale === "es" ? "Pintura reciente" : "Recent paint"}: ${details}`;
 }
 
 function renderPlayback(): void {
@@ -465,17 +479,6 @@ form?.addEventListener("change", (event) => {
   cancelAnimationFrame(frameHandle);
   prepare(false);
 });
-selected("rate").addEventListener("input", (event) => {
-  const output = document.querySelector("[data-rate-output]");
-  if (output)
-    output.textContent = (event.currentTarget as HTMLInputElement).value;
-});
-selected("intensity").addEventListener("input", (event) => {
-  const output = document.querySelector("[data-intensity-output]");
-  if (output)
-    output.textContent = `${(event.currentTarget as HTMLInputElement).value}%`;
-});
-
 const media = matchMedia("(prefers-color-scheme: dark)");
 const applyTheme = (preference: string): void => {
   const valid =

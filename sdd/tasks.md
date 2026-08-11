@@ -65,3 +65,11 @@
 - [x] **T111** (`RCL-PLAY-001`) Fix playback to ten virtual seconds at 1× with half-speed orb travel and no speed selector.
 - [x] **T112** (`RCL-FLOW-001`, `RCL-PERF-001`, `RCL-A11Y-001`) Add bounded, decaying, non-overwriting outcome paint and a textual equivalent.
 - [x] **T113** (`RCL-I18N-001`, `RCL-PERF-001`) Validate locale parity, reduced motion, responsive rendering and bounded DOM output.
+
+## M13 — Scenario-driven capacity
+
+- [x] **T120** (`RCL-TRAFFIC-001`) Replace raw traffic and fault inputs with deterministic business and DoS scenarios.
+- [x] **T121** (`RCL-CAP-001`, `RCL-SIM-001`) Derive resource pressure, latency and errors from scenario demand, scaling and resilience controls.
+- [x] **T122** (`RCL-RES-001`, `RCL-HELP-001`) Group controls by request order and document formulas with official source links.
+- [x] **T123** (`RCL-TOPO-001`, `RCL-FLOW-001`) Keep resource capacity textual, remove recent-paint prose and preserve visual paint.
+- [x] **T124** (`RCL-I18N-001`, `RCL-PERF-001`) Validate deterministic scenarios, scaling effects, accessibility and responsive rendering.

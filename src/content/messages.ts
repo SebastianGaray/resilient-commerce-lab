@@ -6,7 +6,7 @@ const en = {
   title: "Resilient Commerce Lab",
   disclaimer: "Simulation · Not production telemetry",
   intro:
-    "Explore how traffic, dependency failures and bounded resilience controls affect a simulated commerce request path.",
+    "Explore how traffic, service capacity and bounded resilience controls affect a simulated commerce request path.",
   skip: "Skip to simulator",
   theme: "Theme",
   system: "System",
@@ -16,11 +16,9 @@ const en = {
   repository: "Repository",
   portfolio: "Portfolio",
   controls: "Simulation controls",
-  traffic: "Requests per second",
-  pattern: "Traffic pattern",
+  traffic: "Traffic scenario",
+  scaling: "Capacity scaling",
   seed: "Seed",
-  fault: "Injected fault",
-  intensity: "Fault intensity",
   run: "Run simulation",
   playback: {
     play: "Play",
@@ -32,8 +30,6 @@ const en = {
     loopNote: "Continuous repeats the same seeded run.",
     time: "Virtual playback time",
     legend: "Flow legend",
-    paintEmpty: "Recent connection outcomes will appear here during playback.",
-    paintRecent: "Recent connection paint",
   },
   rateLimits: {
     none: "No limit — 1,000 req/s",
@@ -59,22 +55,14 @@ const en = {
       "These inputs configure one deterministic simulation. They do not send real traffic.",
     controlsItems: [
       [
-        "Requests per second",
-        "Arrivals offered each simulated second, from 4 to 1,000.",
+        "Traffic scenario",
+        "Selects a deterministic low day, normal day, CyberDay sale or denial-of-service demand curve.",
       ],
       [
-        "Traffic pattern",
-        "Changes how arrivals vary during the ten-second run.",
+        "Capacity scaling",
+        "None keeps one standard instance. Horizontal automatically adds up to eight instances around a 70% CPU target. Vertical keeps one instance with 2× CPU and memory capacity.",
       ],
       ["Seed", "Reproduces the same generated latencies and outcomes."],
-      [
-        "Injected fault",
-        "Chooses the dependency whose latency and errors degrade.",
-      ],
-      [
-        "Fault intensity",
-        "Controls the probability and latency impact of that fault.",
-      ],
       ["Cache", "Lets browse requests avoid an inventory call on a hit."],
       ["Timeout", "Stops a dependency attempt after the selected duration."],
       [
@@ -102,22 +90,72 @@ const en = {
         "Changes only how the deterministic result is presented, not its outcome.",
       ],
     ],
+    formulaTitle: "Capacity formulas and assumptions",
+    formulaItems: [
+      [
+        "Utilization",
+        "service demand ÷ available per-second capacity. Scenario names never force an error.",
+      ],
+      [
+        "Horizontal",
+        "desired instances = ceil(demand ÷ (per-instance capacity × 0.70)), bounded from 1 to 8.",
+      ],
+      [
+        "Vertical",
+        "One instance receives a simplified 2× CPU and memory allocation; real VPA is periodic and recommendation-based.",
+      ],
+      [
+        "Latency and errors",
+        "Latency pressure begins above 70% utilization. Seeded overload errors begin above 85% and rise with excess demand.",
+      ],
+      [
+        "Memory",
+        "An educational estimate from baseline memory, CPU pressure and worker queue depth; it is not a runtime measurement.",
+      ],
+    ],
     architectureTitle: "How to read the diagram",
     architectureIntro:
-      "Nodes and connections come from the controls. Bubbles sit where each mechanism or fault acts; moving shapes are a bounded sample. Offset green, red, amber and gray paint shows weighted outcomes from the latest two virtual seconds and fades over time.",
+      "Nodes and connections come from the controls. Bubbles show where resilience mechanisms act; moving shapes are a bounded sample. Offset green, red, amber and gray paint shows weighted outcomes from the latest two virtual seconds and fades over time. Resource text reports peak simulated CPU, memory and instances without adding infrastructure nodes.",
+    sourcesTitle: "Model sources",
+    sources: [
+      [
+        "Kubernetes HPA algorithm",
+        "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      ],
+      [
+        "Kubernetes vertical scaling",
+        "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/",
+      ],
+      [
+        "Google SRE: handling overload",
+        "https://sre.google/sre-book/handling-overload/",
+      ],
+      [
+        "Google SRE: cascading failures",
+        "https://sre.google/sre-book/addressing-cascading-failures/",
+      ],
+      [
+        "AWS resilience guidance",
+        "https://docs.aws.amazon.com/whitepapers/latest/availability-and-beyond-improving-resilience/increasing-mtbf.html",
+      ],
+    ],
   },
-  patterns: {
-    constant: "Constant",
-    ramp: "Ramp",
-    burst: "Burst",
-    flash: "Flash sale",
+  scenarios: {
+    low: "Low day",
+    normal: "Normal day",
+    cyber: "CyberDay sale",
+    dos: "Denial-of-service attack",
   },
-  faults: {
-    none: "No fault",
-    inventory: "Inventory degradation",
-    payment: "Payment degradation",
-    cache: "Cache outage",
-    worker: "Worker slowdown",
+  scalingOptions: {
+    none: "No scaling",
+    horizontal: "Automatic horizontal",
+    vertical: "Vertical — 2× capacity",
+  },
+  groups: {
+    entry: "1 · Request entry",
+    dependencies: "2 · Dependency calls",
+    data: "3 · Data access",
+    async: "4 · Asynchronous work",
   },
   resilience: "Resilience controls",
   cache: "Cache",
@@ -127,6 +165,7 @@ const en = {
   circuit: "Circuit breaker",
   limit: "Rate limit",
   idempotency: "Idempotency",
+  resources: { title: "Simulated service capacity" },
   architecture: "Request architecture",
   activity: "Accessible activity summary",
   customer: "Customer experience preview",
@@ -174,7 +213,7 @@ const en = {
     ],
     [
       "Cache",
-      "Browse requests use a deterministic hit probability unless the cache fault is active.",
+      "Browse requests use a deterministic hit probability; misses continue to inventory and consume more capacity.",
       "Caches can reduce latency and dependency load.",
       "Cached data may be stale and invalidation remains application-specific.",
       "Eviction, consistency, stampedes and distributed topology.",
@@ -209,18 +248,16 @@ const es = {
   alternate: "en",
   disclaimer: "Simulación · No es telemetría de producción",
   intro:
-    "Explora cómo el tráfico, los fallos de dependencias y los controles acotados de resiliencia afectan una ruta simulada de comercio.",
+    "Explora cómo el tráfico, la capacidad de los servicios y los controles acotados de resiliencia afectan una ruta simulada de comercio.",
   skip: "Ir al simulador",
   theme: "Tema",
   menu: "Menú",
   repository: "Repositorio",
   portfolio: "Portafolio",
   controls: "Controles de simulación",
-  traffic: "Solicitudes por segundo",
-  pattern: "Patrón de tráfico",
+  traffic: "Escenario de tráfico",
+  scaling: "Escalado de capacidad",
   seed: "Semilla",
-  fault: "Fallo inyectado",
-  intensity: "Intensidad del fallo",
   run: "Ejecutar simulación",
   playback: {
     play: "Reproducir",
@@ -232,9 +269,6 @@ const es = {
     loopNote: "El modo continuo repite la misma ejecución y semilla.",
     time: "Tiempo virtual de reproducción",
     legend: "Leyenda del flujo",
-    paintEmpty:
-      "Los resultados recientes por conexión aparecerán aquí durante la reproducción.",
-    paintRecent: "Pintura reciente por conexión",
   },
   rateLimits: {
     none: "Sin límite — 1.000 sol/s",
@@ -260,22 +294,14 @@ const es = {
       "Estas entradas configuran una simulación determinista. No envían tráfico real.",
     controlsItems: [
       [
-        "Solicitudes por segundo",
-        "Llegadas ofrecidas por segundo simulado, entre 4 y 1.000.",
+        "Escenario de tráfico",
+        "Selecciona una curva determinista de día bajo, día normal, venta CyberDay o ataque de denegación de servicio.",
       ],
       [
-        "Patrón de tráfico",
-        "Cambia cómo varían las llegadas durante los diez segundos.",
+        "Escalado de capacidad",
+        "Sin escalado mantiene una instancia estándar. Horizontal agrega automáticamente hasta ocho instancias alrededor de 70% de CPU. Vertical mantiene una instancia con 2× capacidad de CPU y memoria.",
       ],
       ["Semilla", "Reproduce las mismas latencias y resultados generados."],
-      [
-        "Fallo inyectado",
-        "Elige la dependencia cuya latencia y errores se degradan.",
-      ],
-      [
-        "Intensidad del fallo",
-        "Controla la probabilidad y el impacto de latencia del fallo.",
-      ],
       [
         "Caché",
         "Permite que consultas eviten inventario cuando hay un acierto.",
@@ -309,22 +335,72 @@ const es = {
         "Solo cambia cómo se presenta el resultado, no su resultado lógico.",
       ],
     ],
+    formulaTitle: "Fórmulas y supuestos de capacidad",
+    formulaItems: [
+      [
+        "Utilización",
+        "demanda del servicio ÷ capacidad disponible por segundo. El nombre del escenario nunca fuerza un error.",
+      ],
+      [
+        "Horizontal",
+        "instancias deseadas = ceil(demanda ÷ (capacidad por instancia × 0,70)), acotadas entre 1 y 8.",
+      ],
+      [
+        "Vertical",
+        "Una instancia recibe una asignación simplificada de CPU y memoria 2×; un VPA real actúa periódicamente y usa recomendaciones.",
+      ],
+      [
+        "Latencia y errores",
+        "La presión de latencia comienza sobre 70% de utilización. Los errores de sobrecarga deterministas comienzan sobre 85% y crecen con el exceso.",
+      ],
+      [
+        "Memoria",
+        "Estimación educativa desde memoria base, presión de CPU y profundidad de cola del worker; no es una medición de runtime.",
+      ],
+    ],
     architectureTitle: "Cómo leer el diagrama",
     architectureIntro:
-      "Los nodos y conexiones provienen de los controles. Las burbujas se ubican donde actúa cada mecanismo o fallo; las figuras móviles son una muestra acotada. La pintura verde, roja, ámbar y gris desplazada muestra resultados ponderados de los últimos dos segundos virtuales y se desvanece con el tiempo.",
+      "Los nodos y conexiones provienen de los controles. Las burbujas muestran dónde actúan los mecanismos de resiliencia; las figuras móviles son una muestra acotada. La pintura verde, roja, ámbar y gris desplazada muestra resultados ponderados de los últimos dos segundos virtuales y se desvanece. El texto de recursos informa CPU, memoria e instancias simuladas máximas sin agregar nodos de infraestructura.",
+    sourcesTitle: "Fuentes del modelo",
+    sources: [
+      [
+        "Algoritmo HPA de Kubernetes",
+        "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      ],
+      [
+        "Escalado vertical de Kubernetes",
+        "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/",
+      ],
+      [
+        "Google SRE: manejo de sobrecarga",
+        "https://sre.google/sre-book/handling-overload/",
+      ],
+      [
+        "Google SRE: fallos en cascada",
+        "https://sre.google/sre-book/addressing-cascading-failures/",
+      ],
+      [
+        "Guía de resiliencia de AWS",
+        "https://docs.aws.amazon.com/whitepapers/latest/availability-and-beyond-improving-resilience/increasing-mtbf.html",
+      ],
+    ],
   },
-  patterns: {
-    constant: "Constante",
-    ramp: "Rampa",
-    burst: "Ráfaga",
-    flash: "Venta relámpago",
+  scenarios: {
+    low: "Día bajo",
+    normal: "Día normal",
+    cyber: "Venta CyberDay",
+    dos: "Ataque de denegación de servicio",
   },
-  faults: {
-    none: "Sin fallo",
-    inventory: "Degradación de inventario",
-    payment: "Degradación de pagos",
-    cache: "Caída de caché",
-    worker: "Lentitud del worker",
+  scalingOptions: {
+    none: "Sin escalado",
+    horizontal: "Horizontal automático",
+    vertical: "Vertical — capacidad 2×",
+  },
+  groups: {
+    entry: "1 · Entrada de solicitudes",
+    dependencies: "2 · Llamadas a dependencias",
+    data: "3 · Acceso a datos",
+    async: "4 · Trabajo asíncrono",
   },
   resilience: "Controles de resiliencia",
   cache: "Caché",
@@ -334,6 +410,7 @@ const es = {
   circuit: "Circuit breaker",
   limit: "Límite de tasa",
   idempotency: "Idempotencia",
+  resources: { title: "Capacidad simulada de servicios" },
   architecture: "Arquitectura de solicitudes",
   activity: "Resumen accesible de actividad",
   customer: "Vista previa de experiencia del cliente",
@@ -382,7 +459,7 @@ const es = {
     ],
     [
       "Caché",
-      "Las consultas usan una probabilidad determinista de acierto salvo durante una caída.",
+      "Las consultas usan una probabilidad determinista de acierto; los fallos de caché continúan a inventario y consumen más capacidad.",
       "La caché puede reducir latencia y carga de dependencias.",
       "Los datos pueden quedar obsoletos y la invalidación depende de la aplicación.",
       "Evicción, consistencia, estampidas y topología distribuida.",

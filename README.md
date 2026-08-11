@@ -6,8 +6,8 @@ Public URL after the first validated deployment: <https://sebastiangaray.github.
 
 ## Features
 
-- Seeded discrete-event results with constant, ramp, burst and flash-sale traffic.
-- Fault injection for inventory, payments, cache and asynchronous workers.
+- Seeded Low day, Normal day, CyberDay sale and denial-of-service traffic scenarios.
+- CPU/memory pressure with selectable no scaling, automatic horizontal scaling and simplified 2× vertical scaling.
 - Cache, timeout, retry/backoff/jitter, circuit-breaker, rate-limit and idempotency controls.
 - Live topology derived from those controls, with bounded color-coded request-flow playback.
 - Traffic up to 1,000 requests per second, named rate-limit presets, anchored mechanism bubbles, stable recent activity and bilingual contextual help.
@@ -28,7 +28,7 @@ Use `npm test` for deterministic domain tests and `npm run test:e2e` for browser
 
 ## Architecture and limitations
 
-Astro emits a static site. Strict TypeScript runs the bounded model in the browser; no backend or runtime service receives visitor data. The model deliberately omits network phases, distributed coordination, durable transactions, autoscaling and production-specific policy selection. See [the specification](sdd/spec.md), [implementation plan](sdd/plan.md), [task evidence](sdd/tasks.md) and [primary references](docs/references.md).
+Astro emits a static site. Strict TypeScript runs the bounded model in the browser; no backend or runtime service receives visitor data. The model deliberately omits network phases, distributed coordination, durable transactions, real autoscaler timing and production-specific capacity recommendations. See [the specification](sdd/spec.md), [implementation plan](sdd/plan.md), [task evidence](sdd/tasks.md) and [primary references](docs/references.md).
 
 ## Development workflow
 

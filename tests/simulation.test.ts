@@ -16,7 +16,8 @@ describe("deterministic simulation", () => {
 
   it("derives retry and timeout counts from dependency attempts", () => {
     const config = defaultConfig();
-    config.fault = { target: "payment", intensity: 100 };
+    config.scenario = "dos";
+    config.controls.rateLimit = 1000;
     config.controls.timeoutMs = 80;
     config.controls.retries = 2;
     const result = simulate(config);
@@ -29,7 +30,7 @@ describe("deterministic simulation", () => {
 
   it("bounds accepted work with rate limiting", () => {
     const config = defaultConfig();
-    config.requestsPerSecond = 100;
+    config.scenario = "normal";
     config.controls.rateLimit = 10;
     const result = simulate(config);
     expect(result.metrics.limited).toBeGreaterThan(0);
@@ -38,25 +39,52 @@ describe("deterministic simulation", () => {
 
   it("supports one thousand accepted requests per second", () => {
     const config = defaultConfig();
-    config.requestsPerSecond = 1000;
+    config.scenario = "dos";
     config.controls.rateLimit = 1000;
     const result = simulate(config);
-    expect(result.metrics.offered).toBe(10_000);
-    expect(result.metrics.completed).toBe(10_000);
+    expect(result.metrics.offered).toBe(7940);
+    expect(result.metrics.completed).toBe(7940);
     expect(result.traces.length).toBeLessThanOrEqual(24);
   });
 
   it("compares the same seed and traffic inputs", () => {
     const config = defaultConfig();
-    config.pattern = "burst";
-    config.fault = { target: "inventory", intensity: 70 };
+    config.scenario = "cyber";
+    config.scaling = "horizontal";
+    config.controls.cache = false;
     const result = compare(config);
     expect(result.baseline.config.seed).toBe(result.current.config.seed);
     expect(result.baseline.metrics.offered).toBe(
       result.current.metrics.offered,
     );
-    expect(result.current.metrics.errorRate).toBeGreaterThan(
-      result.baseline.metrics.errorRate,
+    expect(result.current.config.scaling).toBe(result.baseline.config.scaling);
+  });
+
+  it("derives failures from demand relative to capacity", () => {
+    const constrained = defaultConfig();
+    constrained.scenario = "cyber";
+    constrained.scaling = "none";
+    constrained.controls.rateLimit = 1000;
+    const scaled = structuredClone(constrained);
+    scaled.scaling = "horizontal";
+    const constrainedResult = simulate(constrained);
+    const scaledResult = simulate(scaled);
+    expect(constrainedResult.metrics.errorRate).toBeGreaterThan(
+      scaledResult.metrics.errorRate,
     );
+    expect(
+      scaledResult.resources.find((item) => item.service === "order")
+        ?.instances,
+    ).toBeGreaterThan(1);
+  });
+
+  it("models vertical scaling as one instance with double allocation", () => {
+    const config = defaultConfig();
+    config.scenario = "cyber";
+    config.scaling = "vertical";
+    const order = simulate(config).resources.find(
+      (item) => item.service === "order",
+    );
+    expect(order).toMatchObject({ instances: 1, allocation: "2x" });
   });
 });
