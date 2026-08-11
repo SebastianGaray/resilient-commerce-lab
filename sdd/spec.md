@@ -14,11 +14,11 @@ The persistent label is **Simulation · Not production telemetry** / **Simulaci�
 
 - **RCL-SIM-001** Given the same seed, traffic scenario, scaling strategy and resilience controls, the model produces the same ordered events, resources, metrics and representative traces.
 - **RCL-TRAFFIC-001** Users select deterministic Low day, Normal day, CyberDay sale or denial-of-service demand curves with a bounded browse/cart/order mix.
-- **RCL-CAP-001** None, automatic horizontal and simplified 2× vertical scaling derive service CPU, memory, instances, latency and overload errors from demand relative to capacity.
+- **RCL-CAP-001** None, capped automatic horizontal and simplified 2× vertical scaling derive service CPU, memory, instances, latency and overload errors from demand relative to capacity. Horizontal exposes a user-selected maximum and relative capacity footprint.
 - **RCL-RES-001** Cache, timeout, bounded retries, exponential backoff, deterministic jitter, circuit breaker, rate limiting and idempotency have causal, bounded models and visible trade-offs.
 - **RCL-OBS-001** Throughput, p50/p95/p99 latency, error rate, dependency rate, cache hit ratio, queue depth, timeout count, retry count and circuit state derive only from simulation events.
 - **RCL-TRACE-001** Representative traces expose request path, timing, status and correlation identifiers without claiming OpenTelemetry compatibility.
-- **RCL-CX-001** A labeled customer-experience preview derives normal, delayed, stale, limited, unavailable and payment-failure states from the same simulation result.
+- **RCL-CX-001** A labeled customer-experience preview derives normal, delayed, stale, limited, unavailable and payment-failure states from the same simulation result and presents one configuration-aware next step.
 - **RCL-COMP-001** Baseline and current runs use identical scenario, scaling and seed, differing only in resilience controls.
 - **RCL-PROD-001** Each major mechanism explains what is simulated, common production use, trade-offs and omitted complexity with authoritative references.
 - **RCL-A11Y-001** The experience is semantic, keyboard usable, non-color-dependent, reduced-motion compatible and understandable without animation.
@@ -38,6 +38,8 @@ Requirements are complete only when implementation, focused tests, browser evide
 Playback must never change logical results. At completion, displayed metrics equal the full deterministic run. Reduced-motion mode replaces moving orbs with active-edge and event-state updates.
 
 Mechanisms must appear as bubbles anchored over their relevant diagram node or edge. The accessible activity summary keeps a fixed visual height and shows no more than the latest five events so playback never shifts the page vertically.
+
+The single-run playback must use the complete ten-second window without cutting off the final moving request. Play and Pause share one stateful action, and the four-category flow legend is collapsed by default.
 
 Traffic scenarios never force errors. Seeded errors and latency arise only when modeled CPU demand exceeds service capacity after rate limiting, cache effects and selected scaling. Horizontal scaling follows the Kubernetes utilization-ratio form with a 70% target and eight-instance cap; vertical scaling is an explicitly simplified 2× allocation. Help links the official model sources.
 

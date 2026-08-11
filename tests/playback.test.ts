@@ -3,6 +3,7 @@ import {
   createPlaybackTimeline,
   deriveTopology,
   metricsAt,
+  ORB_SPEED,
   tracePaintAt,
   type PlaybackTimeline,
 } from "../src/domain/playback";
@@ -41,6 +42,11 @@ describe("playback timeline", () => {
     expect(first.events.some((event) => event.edge === "queue-worker")).toBe(
       true,
     );
+    const finalVisualEnd = Math.max(
+      ...first.events.map((event) => event.atMs + event.durationMs / ORB_SPEED),
+    );
+    expect(finalVisualEnd).toBeGreaterThan(9_500);
+    expect(finalVisualEnd).toBeLessThanOrEqual(first.durationMs);
   });
 
   it("keeps overlapping outcomes in separate bounded paint layers", () => {

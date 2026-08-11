@@ -62,6 +62,9 @@ export interface PlaybackTimeline {
   sampledRequests: number;
 }
 
+export const PLAYBACK_DURATION_MS = 10_000;
+export const ORB_SPEED = 0.5;
+
 export type PaintKind = "success" | "error" | "wait" | "limited";
 
 export interface TracePaint {
@@ -247,9 +250,22 @@ export function createPlaybackTimeline(
       });
     }
   }
+  const sorted = events.sort(
+    (a, b) => a.atMs - b.atMs || a.id.localeCompare(b.id),
+  );
+  const lastVisualEnd = Math.max(
+    1,
+    ...sorted.map((event) => event.atMs + event.durationMs / ORB_SPEED),
+  );
+  const fit = (PLAYBACK_DURATION_MS - 150) / lastVisualEnd;
+  const fitted = sorted.map((event) => ({
+    ...event,
+    atMs: Math.round(event.atMs * fit),
+    durationMs: Math.max(1, Math.round(event.durationMs * fit)),
+  }));
   return {
-    durationMs: 10_000,
-    events: events.sort((a, b) => a.atMs - b.atMs || a.id.localeCompare(b.id)),
+    durationMs: PLAYBACK_DURATION_MS,
+    events: fitted,
     sampledRequests: traces.length,
   };
 }

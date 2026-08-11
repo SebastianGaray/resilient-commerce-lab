@@ -87,4 +87,17 @@ describe("deterministic simulation", () => {
     );
     expect(order).toMatchObject({ instances: 1, allocation: "2x" });
   });
+
+  it("caps horizontal scaling at the selected instance maximum", () => {
+    const config = defaultConfig();
+    config.scenario = "dos";
+    config.scaling = "horizontal";
+    config.maxInstances = 2;
+    config.controls.rateLimit = 1000;
+    const result = simulate(config);
+    expect(result.resources.every((item) => item.instances <= 2)).toBe(true);
+    expect(result.resources.some((item) => item.state === "saturated")).toBe(
+      true,
+    );
+  });
 });

@@ -9,6 +9,7 @@ import {
   createPlaybackTimeline,
   deriveTopology,
   metricsAt,
+  ORB_SPEED,
   tracePaintAt,
   type FlowKind,
   type PaintKind,
@@ -31,6 +32,22 @@ const text =
         limitedOutcome: "Limitada",
         request: "solicitud",
         attempts: "solicitudes a dependencias",
+        recommendation: "Próximo paso recomendado",
+        stableAdvice:
+          "La configuración absorbe este escenario. Mantén monitoreo y valida los límites con pruebas de carga.",
+        scaleAdvice:
+          "Un servicio se saturó con una sola instancia. Activa escalado horizontal y define un máximo acorde al presupuesto.",
+        capAdvice:
+          "El escalado alcanzó su máximo. Reduce la admisión con rate limiting; aumenta el tope solo tras validar capacidad y presupuesto.",
+        errorAdvice:
+          "Primero reduce presión con capacidad o rate limiting. Mantén reintentos acotados para no amplificar la carga.",
+        limitedAdvice:
+          "El rate limit está protegiendo los servicios. Súbelo solo si CPU y memoria conservan margen.",
+        latencyAdvice:
+          "Identifica el servicio ocupado y agrega capacidad antes de ampliar timeouts.",
+        footprint: "Huella de capacidad",
+        units: "unidades",
+        perService: "máximo por servicio",
       }
     : {
         normal: "The experience responds normally.",
@@ -43,6 +60,22 @@ const text =
         limitedOutcome: "Limited",
         request: "request",
         attempts: "dependency requests",
+        recommendation: "Recommended next move",
+        stableAdvice:
+          "This configuration absorbs the scenario. Keep monitoring and validate limits with load tests.",
+        scaleAdvice:
+          "A service saturated on one instance. Enable horizontal scaling and set a budget-aware maximum.",
+        capAdvice:
+          "Scaling reached its maximum. Reduce admission with rate limiting; raise the cap only after capacity and budget validation.",
+        errorAdvice:
+          "Reduce pressure with capacity or rate limiting first. Keep retries bounded so they do not amplify load.",
+        limitedAdvice:
+          "The rate limit is protecting services. Raise it only while CPU and memory retain headroom.",
+        latencyAdvice:
+          "Identify the busy service and add capacity before widening timeouts.",
+        footprint: "Capacity footprint",
+        units: "units",
+        perService: "maximum per service",
       };
 
 function selected(name: string): HTMLInputElement | HTMLSelectElement {
@@ -130,6 +163,35 @@ function render(
     customer.innerHTML = `<span class="status">${state}</span><strong>${state === "normal" ? text.normal : state === "delayed" ? text.delayed : state === "limited" ? text.limited : text.unavailable}</strong><small>${m.completed} ${text.request}${m.completed === 1 ? "" : "s"} · ${m.dependencyRequests} ${text.attempts}</small>`;
   }
 
+  const recommendation = document.querySelector<HTMLElement>(
+    "[data-recommendation]",
+  );
+  if (recommendation) {
+    const saturated = result.resources.some(
+      (item) => item.service !== "cache" && item.state === "saturated",
+    );
+    const atHorizontalCap =
+      result.config.scaling === "horizontal" &&
+      result.resources.some(
+        (item) =>
+          item.state === "saturated" &&
+          item.instances >= result.config.maxInstances,
+      );
+    const advice =
+      m.errorRate > 0
+        ? atHorizontalCap
+          ? text.capAdvice
+          : result.config.scaling === "none" && saturated
+            ? text.scaleAdvice
+            : text.errorAdvice
+        : m.limited > 0
+          ? text.limitedAdvice
+          : m.p95 > 500
+            ? text.latencyAdvice
+            : text.stableAdvice;
+    recommendation.innerHTML = `<strong>${text.recommendation}</strong><p>${advice}</p>`;
+  }
+
   const comparison = document.querySelector<HTMLElement>("[data-comparison]");
   if (comparison)
     comparison.innerHTML = `<table><thead><tr><th>${locale === "es" ? "Métrica" : "Metric"}</th><th>${locale === "es" ? "Base" : "Baseline"}</th><th>${locale === "es" ? "Actual" : "Current"}</th></tr></thead><tbody><tr><th>p95</th><td>${baseline.metrics.p95} ms</td><td>${m.p95} ms</td></tr><tr><th>${locale === "es" ? "Errores" : "Errors"}</th><td>${baseline.metrics.errorRate}%</td><td>${m.errorRate}%</td></tr><tr><th>${locale === "es" ? "Reintentos" : "Retries"}</th><td>${baseline.metrics.retries}</td><td>${m.retries}</td></tr></tbody></table>`;
@@ -147,6 +209,7 @@ function render(
   renderResources(
     result.resources,
     result.config.scaling,
+    result.config.maxInstances,
     result.config.controls.cache,
   );
 }
@@ -154,6 +217,7 @@ function render(
 function renderResources(
   resources: ResourceSnapshot[],
   scaling: SimulationConfig["scaling"],
+  maxInstances: number,
   cacheEnabled: boolean,
 ): void {
   const container = document.querySelector<HTMLElement>("[data-resources]");
@@ -170,8 +234,10 @@ function renderResources(
     locale === "es"
       ? { healthy: "saludable", busy: "ocupado", saturated: "saturado" }
       : { healthy: "healthy", busy: "busy", saturated: "saturated" };
-  container.innerHTML = resources
-    .filter((item) => item.service !== "cache" || cacheEnabled)
+  const visibleResources = resources.filter(
+    (item) => item.service !== "cache" || cacheEnabled,
+  );
+  container.innerHTML = visibleResources
     .map((item) => {
       const scaleText =
         scaling === "horizontal"
@@ -190,12 +256,27 @@ function renderResources(
       return `<article data-state="${item.state}"><strong>${serviceNames[item.service]}</strong><span>CPU ${item.cpu}% · ${locale === "es" ? "memoria" : "memory"} ${item.memory}%</span><small>${scaleText} · ${stateNames[item.state]}</small></article>`;
     })
     .join("");
+  const cost = document.querySelector<HTMLElement>("[data-capacity-cost]");
+  if (cost) {
+    const units = visibleResources.reduce(
+      (total, item) => total + (item.allocation === "2x" ? 2 : item.instances),
+      0,
+    );
+    cost.textContent = `${text.footprint}: ${units} ${text.units}${
+      scaling === "horizontal" ? ` · ${maxInstances} ${text.perService}` : ""
+    }`;
+  }
+  const maxControl = document.querySelector<HTMLElement>(
+    "[data-horizontal-limit]",
+  );
+  if (maxControl) maxControl.hidden = scaling !== "horizontal";
 }
 
 function readConfig(): SimulationConfig {
   const config = defaultConfig();
   config.scenario = selected("scenario").value as typeof config.scenario;
   config.scaling = selected("scaling").value as typeof config.scaling;
+  config.maxInstances = Number(selected("maxInstances").value);
   config.seed = Number(selected("seed").value);
   config.controls.cache = (selected("cache") as HTMLInputElement).checked;
   config.controls.timeoutMs = Number(selected("timeout").value);
@@ -219,7 +300,15 @@ let previousFrame = 0;
 let frameHandle = 0;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const svgNamespace = "http://www.w3.org/2000/svg";
-const orbSpeed = 0.5;
+
+function updatePlayButton(): void {
+  const button = document.querySelector<HTMLButtonElement>("[data-play]");
+  if (!button) return;
+  button.textContent = playing
+    ? (button.dataset.pauseLabel ?? "Pause")
+    : (button.dataset.playLabel ?? "Play");
+  button.setAttribute("aria-pressed", String(playing));
+}
 
 function renderTopology(): void {
   const topology = deriveTopology(
@@ -326,7 +415,7 @@ function renderOrbs(active: PlaybackEvent[]): void {
     if (!path || path.hasAttribute("hidden")) return;
     const fraction = Math.max(
       0,
-      Math.min(1, (virtualMs - event.atMs) / (event.durationMs / orbSpeed)),
+      Math.min(1, (virtualMs - event.atMs) / (event.durationMs / ORB_SPEED)),
     );
     const point = path.getPointAtLength(
       path.getTotalLength() * (event.reverse ? 1 - fraction : fraction),
@@ -376,7 +465,7 @@ function renderPlayback(): void {
   const active = timeline.events.filter(
     (event) =>
       virtualMs >= event.atMs &&
-      virtualMs < event.atMs + event.durationMs / orbSpeed,
+      virtualMs < event.atMs + event.durationMs / ORB_SPEED,
   );
   renderTracePaint();
   renderOrbs(active);
@@ -422,6 +511,7 @@ function prepare(autoplay: boolean): void {
   virtualMs = 0;
   previousFrame = 0;
   playing = autoplay;
+  updatePlayButton();
   renderTopology();
   renderPlayback();
   if (playing) frameHandle = requestAnimationFrame(tick);
@@ -442,6 +532,7 @@ function tick(timestamp: number): void {
       previousFrame = timestamp;
     } else {
       playing = false;
+      updatePlayButton();
       return;
     }
   }
@@ -450,23 +541,17 @@ function tick(timestamp: number): void {
 
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (virtualMs >= timeline.durationMs) prepare(true);
-  else if (!playing) {
+  if (playing) {
+    playing = false;
+    cancelAnimationFrame(frameHandle);
+    updatePlayButton();
+  } else if (virtualMs >= timeline.durationMs) prepare(true);
+  else {
     playing = true;
     previousFrame = 0;
+    updatePlayButton();
     frameHandle = requestAnimationFrame(tick);
   }
-});
-document.querySelector("[data-pause]")?.addEventListener("click", () => {
-  playing = false;
-  cancelAnimationFrame(frameHandle);
-});
-document.querySelector("[data-restart]")?.addEventListener("click", () => {
-  playing = false;
-  cancelAnimationFrame(frameHandle);
-  virtualMs = 0;
-  previousFrame = 0;
-  renderPlayback();
 });
 form?.addEventListener("change", (event) => {
   const target = event.target as HTMLInputElement | HTMLSelectElement;

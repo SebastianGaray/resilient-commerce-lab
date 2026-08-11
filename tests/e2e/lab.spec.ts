@@ -16,6 +16,8 @@ for (const locale of ["en", "es"] as const) {
     await expect(page.locator("[data-metrics] article")).toHaveCount(10);
     await page.locator('select[name="scenario"]').selectOption("cyber");
     await page.locator('select[name="scaling"]').selectOption("horizontal");
+    await expect(page.locator("[data-horizontal-limit]")).toBeVisible();
+    await page.locator('select[name="maxInstances"]').selectOption("2");
     await page
       .getByRole("button", {
         name: locale === "en" ? "Play" : "Reproducir",
@@ -23,6 +25,10 @@ for (const locale of ["en", "es"] as const) {
       .click();
     await expect(page.locator("[data-traces] details").first()).toBeVisible();
     await expect(page.locator("[data-resources] article")).toHaveCount(6);
+    await expect(page.locator("[data-capacity-cost]")).toContainText(
+      locale === "en" ? "maximum per service" : "máximo por servicio",
+    );
+    await expect(page.locator("[data-recommendation]")).not.toBeEmpty();
     await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute(
       "href",
       /\/en\/$/,
@@ -60,6 +66,10 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   await expect(page.locator('select[name="fault"]')).toHaveCount(0);
   await expect(page.locator('select[name="limit"] option')).toHaveCount(4);
   await expect(page.locator('select[name="speed"]')).toHaveCount(0);
+  await expect(page.locator(".playback-actions button")).toHaveCount(1);
+  await expect(page.locator(".flow-legend")).not.toHaveAttribute("open", "");
+  await page.locator(".flow-legend summary").click();
+  await expect(page.locator(".flow-legend li")).toHaveCount(4);
   await expect(page.locator('select[name="limit"]')).toHaveValue("250");
   await expect(page.locator("[data-annotations]")).toContainText(
     "Circuit breaker: closed",
@@ -112,4 +122,19 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     "href",
     /kubernetes\.io/,
   );
+});
+
+test("single playback uses the full ten-second animation window", async ({
+  page,
+}) => {
+  await page.goto("en/");
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.waitForTimeout(9_200);
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  await expect(page.locator("[data-orbs] > *")).not.toHaveCount(0);
+  await expect(page.locator("[data-playback-time]")).not.toHaveText("10.0 s");
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible({
+    timeout: 1_500,
+  });
+  await expect(page.locator("[data-playback-time]")).toHaveText("10.0 s");
 });
