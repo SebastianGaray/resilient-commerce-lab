@@ -1,9 +1,10 @@
 import type {
+  ResourceSnapshot,
   SimulationConfig,
   SimulationMetrics,
   SimulationResult,
   TraceSpan,
-} from "./simulation";
+} from "./simulation"
 
 export type FlowKind =
   | "request"
@@ -13,7 +14,7 @@ export type FlowKind =
   | "retry"
   | "limited"
   | "cache-hit"
-  | "cache-miss";
+  | "cache-miss"
 export type NodeId =
   | "client"
   | "limiter"
@@ -23,7 +24,7 @@ export type NodeId =
   | "inventory"
   | "payment"
   | "queue"
-  | "worker";
+  | "worker"
 export type EdgeId =
   | "client-limiter"
   | "limiter-gateway"
@@ -33,45 +34,45 @@ export type EdgeId =
   | "order-inventory"
   | "order-payment"
   | "order-queue"
-  | "queue-worker";
+  | "queue-worker"
 
 export interface DerivedTopology {
-  nodes: NodeId[];
-  edges: EdgeId[];
+  nodes: NodeId[]
+  edges: EdgeId[]
   annotations: Array<{
-    target: NodeId | EdgeId;
-    label: string;
-    state: "enabled" | "open";
-  }>;
+    target: NodeId | EdgeId
+    label: string
+    state: "enabled" | "open"
+  }>
 }
 
 export interface PlaybackEvent {
-  id: string;
-  requestId: string;
-  atMs: number;
-  durationMs: number;
-  edge: EdgeId;
-  reverse: boolean;
-  kind: FlowKind;
-  label: string;
+  id: string
+  requestId: string
+  atMs: number
+  durationMs: number
+  edge: EdgeId
+  reverse: boolean
+  kind: FlowKind
+  label: string
 }
 
 export interface PlaybackTimeline {
-  durationMs: number;
-  events: PlaybackEvent[];
-  sampledRequests: number;
+  durationMs: number
+  events: PlaybackEvent[]
+  sampledRequests: number
 }
 
-export const PLAYBACK_DURATION_MS = 10_000;
-export const ORB_SPEED = 0.5;
+export const PLAYBACK_DURATION_MS = 10_000
+export const ORB_SPEED = 0.5
 
-export type PaintKind = "success" | "error" | "wait" | "limited";
+export type PaintKind = "success" | "error" | "wait" | "limited"
 
 export interface TracePaint {
-  edge: EdgeId;
-  kind: PaintKind;
-  count: number;
-  intensity: number;
+  edge: EdgeId
+  kind: PaintKind
+  count: number
+  intensity: number
 }
 
 export const deriveTopology = (
@@ -86,7 +87,7 @@ export const deriveTopology = (
     "payment",
     "queue",
     "worker",
-  ];
+  ]
   const edges: EdgeId[] = [
     "client-gateway",
     "gateway-order",
@@ -94,63 +95,63 @@ export const deriveTopology = (
     "order-payment",
     "order-queue",
     "queue-worker",
-  ];
-  const annotations: DerivedTopology["annotations"] = [];
+  ]
+  const annotations: DerivedTopology["annotations"] = []
   if (config.controls.rateLimit < 1000) {
-    nodes.splice(1, 0, "limiter");
+    nodes.splice(1, 0, "limiter")
     edges.splice(
       edges.indexOf("client-gateway"),
       1,
       "client-limiter",
       "limiter-gateway",
-    );
+    )
     annotations.push({
       target: "limiter",
       label: `≤ ${config.controls.rateLimit}/s`,
       state: "enabled",
-    });
+    })
   }
   if (config.controls.cache) {
-    nodes.push("cache");
-    edges.push("order-cache");
+    nodes.push("cache")
+    edges.push("order-cache")
   }
   if (config.controls.retries > 0)
     annotations.push({
       target: "order",
       label: `${config.controls.retries} retry`,
       state: "enabled",
-    });
+    })
   if (config.controls.circuitBreaker)
     annotations.push({
       target: "order-payment",
       label: circuitState,
       state: circuitState === "open" ? "open" : "enabled",
-    });
+    })
   if (config.controls.idempotency)
     annotations.push({
       target: "order-queue",
       label: "idempotent",
       state: "enabled",
-    });
-  return { nodes, edges, annotations };
-};
+    })
+  return { nodes, edges, annotations }
+}
 
 const spanEdge = (span: TraceSpan): EdgeId | undefined => {
-  if (span.service === "Cache") return "order-cache";
-  if (span.service === "Inventory Service") return "order-inventory";
-  if (span.service === "Payment Service") return "order-payment";
-  if (span.service === "Queue") return "order-queue";
-  return undefined;
-};
+  if (span.service === "Cache") return "order-cache"
+  if (span.service === "Inventory Service") return "order-inventory"
+  if (span.service === "Payment Service") return "order-payment"
+  if (span.service === "Queue") return "order-queue"
+  return undefined
+}
 
 const spanKind = (span: TraceSpan): FlowKind => {
-  if (span.detail === "Hit") return "cache-hit";
-  if (span.detail === "Miss") return "cache-miss";
-  if (span.status === "timeout" || span.status === "error") return "error";
+  if (span.detail === "Hit") return "cache-hit"
+  if (span.detail === "Miss") return "cache-miss"
+  if (span.status === "timeout" || span.status === "error") return "error"
   if (span.detail.startsWith("Attempt ") && span.detail !== "Attempt 1")
-    return "retry";
-  return span.durationMs > 350 ? "wait" : "request";
-};
+    return "retry"
+  return span.durationMs > 350 ? "wait" : "request"
+}
 
 export function createPlaybackTimeline(
   result: SimulationResult,
@@ -158,22 +159,22 @@ export function createPlaybackTimeline(
 ): PlaybackTimeline {
   const queued = result.traces.filter((trace) =>
     trace.spans.some((span) => span.service === "Queue"),
-  );
-  const preferred = [...queued.slice(0, 4), ...result.traces];
+  )
+  const preferred = [...queued.slice(0, 4), ...result.traces]
   const traces = preferred
     .filter(
       (trace, index, all) =>
         all.findIndex((candidate) => candidate.id === trace.id) === index,
     )
-    .slice(0, maxRequests);
-  const events: PlaybackEvent[] = [];
-  const spacing = 520;
+    .slice(0, maxRequests)
+  const events: PlaybackEvent[] = []
+  const spacing = 520
   traces.forEach((trace, traceIndex) => {
-    const base = traceIndex * spacing;
+    const base = traceIndex * spacing
     const requestEdges: EdgeId[] =
       result.config.controls.rateLimit < 1000
         ? ["client-limiter", "limiter-gateway", "gateway-order"]
-        : ["client-gateway", "gateway-order"];
+        : ["client-gateway", "gateway-order"]
     requestEdges.forEach((edge, edgeIndex) =>
       events.push({
         id: `${trace.id}-in-${edgeIndex}`,
@@ -185,12 +186,12 @@ export function createPlaybackTimeline(
         kind: "request",
         label: `${trace.kind} request`,
       }),
-    );
-    let cursor = base + requestEdges.length * 130;
+    )
+    let cursor = base + requestEdges.length * 130
     trace.spans.forEach((span, spanIndex) => {
-      const edge = spanEdge(span);
-      if (!edge) return;
-      const kind = spanKind(span);
+      const edge = spanEdge(span)
+      if (!edge) return
+      const kind = spanKind(span)
       events.push({
         id: `${trace.id}-span-${spanIndex}`,
         requestId: trace.id,
@@ -200,7 +201,7 @@ export function createPlaybackTimeline(
         reverse: false,
         kind,
         label: `${span.service}: ${span.detail}`,
-      });
+      })
       if (span.service === "Queue") {
         events.push({
           id: `${trace.id}-worker-${spanIndex}`,
@@ -211,9 +212,9 @@ export function createPlaybackTimeline(
           reverse: false,
           kind: span.durationMs > 350 ? "wait" : "request",
           label: "Worker: consume message",
-        });
+        })
       }
-      cursor += Math.max(160, Math.min(600, span.durationMs));
+      cursor += Math.max(160, Math.min(600, span.durationMs))
       events.push({
         id: `${trace.id}-return-${spanIndex}`,
         requestId: trace.id,
@@ -223,10 +224,11 @@ export function createPlaybackTimeline(
         reverse: true,
         kind: span.status === "success" ? "success" : "error",
         label: `${span.service}: ${span.status}`,
-      });
-      cursor += 120;
-    });
-    [...requestEdges].reverse().forEach((edge, edgeIndex) =>
+      })
+      cursor += 120
+    })
+    const responseEdges = [...requestEdges].reverse()
+    responseEdges.forEach((edge, edgeIndex) =>
       events.push({
         id: `${trace.id}-out-${edgeIndex}`,
         requestId: trace.id,
@@ -242,10 +244,10 @@ export function createPlaybackTimeline(
               : "error",
         label: `${trace.kind}: ${trace.outcome}`,
       }),
-    );
-  });
+    )
+  })
   if (result.metrics.limited > 0 && result.config.controls.rateLimit < 1000) {
-    const limitedCount = Math.min(3, result.metrics.limited);
+    const limitedCount = Math.min(3, result.metrics.limited)
     for (let index = 0; index < limitedCount; index += 1) {
       events.push({
         id: `limited-${index}`,
@@ -256,76 +258,76 @@ export function createPlaybackTimeline(
         reverse: true,
         kind: "limited",
         label: "Rate limiter: rejected",
-      });
+      })
     }
   }
   const sorted = events.sort(
     (a, b) => a.atMs - b.atMs || a.id.localeCompare(b.id),
-  );
+  )
   const lastVisualEnd = Math.max(
     1,
     ...sorted.map((event) => event.atMs + event.durationMs / ORB_SPEED),
-  );
-  const fit = (PLAYBACK_DURATION_MS - 150) / lastVisualEnd;
+  )
+  const fit = (PLAYBACK_DURATION_MS - 150) / lastVisualEnd
   const fitted = sorted.map((event) => ({
     ...event,
     atMs: Math.round(event.atMs * fit),
     durationMs: Math.max(1, Math.round(event.durationMs * fit)),
-  }));
+  }))
   return {
     durationMs: PLAYBACK_DURATION_MS,
     events: fitted,
     sampledRequests: traces.length,
-  };
+  }
 }
 
 const paintKind = (kind: FlowKind): PaintKind | undefined => {
-  if (kind === "success" || kind === "cache-hit") return "success";
-  if (kind === "error") return "error";
+  if (kind === "success" || kind === "cache-hit") return "success"
+  if (kind === "error") return "error"
   if (kind === "wait" || kind === "retry" || kind === "cache-miss")
-    return "wait";
-  if (kind === "limited") return "limited";
-  return undefined;
-};
+    return "wait"
+  if (kind === "limited") return "limited"
+  return undefined
+}
 
 export function tracePaintAt(
   timeline: PlaybackTimeline,
   virtualMs: number,
   windowMs = 2000,
 ): TracePaint[] {
-  const aggregates = new Map<string, { count: number; weight: number }>();
+  const aggregates = new Map<string, { count: number; weight: number }>()
   timeline.events.forEach((event) => {
-    const kind = paintKind(event.kind);
-    const age = virtualMs - event.atMs;
-    if (!kind || age < 0 || age > windowMs) return;
-    const key = `${event.edge}:${kind}`;
-    const current = aggregates.get(key) ?? { count: 0, weight: 0 };
-    current.count += 1;
-    current.weight += 1 - age / windowMs;
-    aggregates.set(key, current);
-  });
+    const kind = paintKind(event.kind)
+    const age = virtualMs - event.atMs
+    if (!kind || age < 0 || age > windowMs) return
+    const key = `${event.edge}:${kind}`
+    const current = aggregates.get(key) ?? { count: 0, weight: 0 }
+    current.count += 1
+    current.weight += 1 - age / windowMs
+    aggregates.set(key, current)
+  })
   return [...aggregates.entries()]
     .map(([key, value]) => {
-      const [edge, kind] = key.split(":") as [EdgeId, PaintKind];
+      const [edge, kind] = key.split(":") as [EdgeId, PaintKind]
       return {
         edge,
         kind,
         count: value.count,
         intensity: Math.min(1, Math.round((value.weight / 3) * 100) / 100),
-      };
+      }
     })
     .sort(
       (a, b) => a.edge.localeCompare(b.edge) || a.kind.localeCompare(b.kind),
-    );
+    )
 }
 
 export const metricsAt = (
   metrics: SimulationMetrics,
   progress: number,
 ): SimulationMetrics => {
-  const fraction = Math.max(0, Math.min(1, progress));
-  const scale = (value: number): number => Math.round(value * fraction);
-  if (fraction >= 1) return structuredClone(metrics);
+  const fraction = Math.max(0, Math.min(1, progress))
+  const scale = (value: number): number => Math.round(value * fraction)
+  if (fraction >= 1) return structuredClone(metrics)
   return {
     ...metrics,
     offered: scale(metrics.offered),
@@ -342,5 +344,18 @@ export const metricsAt = (
     p95: fraction === 0 ? 0 : metrics.p95,
     p99: fraction === 0 ? 0 : metrics.p99,
     circuitState: fraction === 0 ? "closed" : metrics.circuitState,
-  };
-};
+  }
+}
+
+export const resourcesAt = (
+  result: SimulationResult,
+  progress: number,
+): ResourceSnapshot[] => {
+  const fraction = Math.max(0, Math.min(1, progress))
+  if (fraction === 0 || result.resourceTimeline.length === 0) return []
+  const index = Math.min(
+    result.resourceTimeline.length - 1,
+    Math.floor(fraction * result.resourceTimeline.length),
+  )
+  return structuredClone(result.resourceTimeline[index] ?? [])
+}

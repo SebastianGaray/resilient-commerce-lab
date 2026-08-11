@@ -1,17 +1,17 @@
 ---
-import type { messages } from "../content/messages";
-import "../styles/global.css";
+import type { messages } from "../content/messages"
+import "../styles/global.css"
 
-type Copy = (typeof messages)[keyof typeof messages];
+type Copy = (typeof messages)[keyof typeof messages]
 interface Props {
-  copy: Copy;
+  copy: Copy
 }
-const { copy } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-const canonical = new URL(`${base}${copy.lang}/`, Astro.site);
-const alternate = new URL(`${base}${copy.alternate}/`, Astro.site);
-const scenarios = Object.entries(copy.scenarios);
-const scalingOptions = Object.entries(copy.scalingOptions);
+const { copy } = Astro.props
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/")
+const canonical = new URL(`${base}${copy.lang}/`, Astro.site)
+const alternate = new URL(`${base}${copy.alternate}/`, Astro.site)
+const scenarios = Object.entries(copy.scenarios)
+const scalingOptions = Object.entries(copy.scalingOptions)
 ---
 
 <!doctype html>
@@ -38,21 +38,21 @@ const scalingOptions = Object.entries(copy.scalingOptions);
     />
     <title>{copy.title}</title>
     <script is:inline>
-      (() => {
-        const key = "rcl-theme";
-        const saved = localStorage.getItem(key);
+      {
+        const key = "rcl-theme"
+        const saved = localStorage.getItem(key)
         const preference =
-          saved === "light" || saved === "dark" ? saved : "system";
-        const dark = matchMedia("(prefers-color-scheme: dark)");
+          saved === "light" || saved === "dark" ? saved : "system"
+        const dark = matchMedia("(prefers-color-scheme: dark)")
         const theme =
           preference === "system"
             ? dark.matches
               ? "dark"
               : "light"
-            : preference;
-        document.documentElement.dataset.themePreference = preference;
-        document.documentElement.dataset.theme = theme;
-      })();
+            : preference
+        document.documentElement.dataset.themePreference = preference
+        document.documentElement.dataset.theme = theme
+      }
     </script>
   </head>
   <body data-locale={copy.lang}>
@@ -193,21 +193,6 @@ const scalingOptions = Object.entries(copy.scalingOptions);
                 ))
               }</select
             ></label
-          >
-          <label data-horizontal-limit hidden
-            >{copy.maxInstances}<select name="maxInstances"
-              ><option value="2">2</option><option value="4" selected>4</option
-              ><option value="8">8</option></select
-            ></label
-          >
-          <label
-            >{copy.seed}<input
-              name="seed"
-              type="number"
-              min="1"
-              max="999999"
-              value="42"
-            /></label
           >
           <fieldset>
             <legend>{copy.groups.entry}</legend>
@@ -480,7 +465,7 @@ const scalingOptions = Object.entries(copy.scalingOptions);
       </section>
     </main>
     <script>
-      import "../scripts/lab";
+      import "../scripts/lab"
     </script>
   </body>
 </html>

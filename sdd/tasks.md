@@ -89,3 +89,12 @@
 - [x] **T142** (`RCL-CX-001`) Gate customer preview and next-step guidance on progressive playback evidence.
 - [x] **T143** (`RCL-TOPO-001`) Anchor circuit breaker on dependency calls and place the legend directly below the diagram.
 - [x] **T144** (`RCL-I18N-001`, `RCL-PERF-001`) Validate defaults, queue visibility, progressive guidance, annotation placement and responsive rendering.
+
+## M16 — Progressive capacity and consolidated controls
+
+- [x] **T150** (`RCL-CAP-001`) Store and reveal per-second resource snapshots during playback.
+- [x] **T151** (`RCL-CAP-001`, `RCL-I18N-001`) Consolidate scaling and pod caps into one localized selector.
+- [x] **T152** (`RCL-SIM-001`, `RCL-TRAFFIC-001`) Keep seed internal and show the active-client population for every scenario.
+- [x] **T153** (`RCL-CX-001`) Present several applicable next moves with reasons.
+- [x] **T154** (`RCL-I18N-001`) Remove semicolons from client copy, documentation and stylistic JavaScript or TypeScript termination.
+- [x] **T155** (`RCL-PERF-001`, `RCL-A11Y-001`) Validate progressive capacity, consolidated controls, guidance and responsive rendering.

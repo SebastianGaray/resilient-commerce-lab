@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test"
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -16,4 +16,4 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 5"] } },
     { name: "mobile-320", use: { viewport: { width: 320, height: 720 } } },
   ],
-});
+})

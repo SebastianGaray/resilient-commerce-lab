@@ -1,65 +1,66 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest"
 import {
   createPlaybackTimeline,
   deriveTopology,
   metricsAt,
   ORB_SPEED,
+  resourcesAt,
   tracePaintAt,
   type PlaybackTimeline,
-} from "../src/domain/playback";
-import { defaultConfig, simulate } from "../src/domain/simulation";
+} from "../src/domain/playback"
+import { defaultConfig, simulate } from "../src/domain/simulation"
 
 describe("derived topology", () => {
   it("adds and removes mechanism nodes from existing controls", () => {
-    const config = defaultConfig();
-    config.controls.cache = true;
-    config.controls.rateLimit = 250;
-    const enabled = deriveTopology(config, "closed");
-    expect(enabled.nodes).toContain("cache");
-    expect(enabled.nodes).toContain("limiter");
-    config.controls.cache = false;
-    config.controls.rateLimit = 1000;
-    const disabled = deriveTopology(config, "closed");
-    expect(disabled.nodes).not.toContain("cache");
-    expect(disabled.nodes).not.toContain("limiter");
-    expect(disabled.edges).toContain("client-gateway");
-  });
+    const config = defaultConfig()
+    config.controls.cache = true
+    config.controls.rateLimit = 250
+    const enabled = deriveTopology(config, "closed")
+    expect(enabled.nodes).toContain("cache")
+    expect(enabled.nodes).toContain("limiter")
+    config.controls.cache = false
+    config.controls.rateLimit = 1000
+    const disabled = deriveTopology(config, "closed")
+    expect(disabled.nodes).not.toContain("cache")
+    expect(disabled.nodes).not.toContain("limiter")
+    expect(disabled.edges).toContain("client-gateway")
+  })
 
   it("anchors dependency mechanisms to the order service", () => {
-    const config = defaultConfig();
-    config.controls.retries = 1;
-    config.controls.circuitBreaker = true;
+    const config = defaultConfig()
+    config.controls.retries = 1
+    config.controls.circuitBreaker = true
     expect(deriveTopology(config, "closed").annotations).toContainEqual(
       expect.objectContaining({ target: "order", label: "1 retry" }),
-    );
+    )
     expect(deriveTopology(config, "closed").annotations).toContainEqual(
       expect.objectContaining({ target: "order-payment", label: "closed" }),
-    );
-  });
-});
+    )
+  })
+})
 
 describe("playback timeline", () => {
   it("is deterministic and bounded to twelve sampled requests", () => {
-    const result = simulate(defaultConfig());
-    const first = createPlaybackTimeline(result);
-    expect(first).toEqual(createPlaybackTimeline(result));
-    expect(first.sampledRequests).toBeLessThanOrEqual(12);
-    expect(first.durationMs).toBe(10_000);
-    expect(first.events.length).toBeGreaterThan(0);
+    const result = simulate(defaultConfig())
+    const first = createPlaybackTimeline(result)
+    expect(first).toEqual(createPlaybackTimeline(result))
+    expect(first.sampledRequests).toBeLessThanOrEqual(12)
+    expect(first.durationMs).toBe(10_000)
+    expect(first.events.length).toBeGreaterThan(0)
     expect(first.events.some((event) => event.edge === "queue-worker")).toBe(
       true,
-    );
+    )
     expect(
       first.events.filter(
         (event) => event.edge === "order-queue" && !event.reverse,
       ).length,
-    ).toBeGreaterThanOrEqual(4);
+    ).toBeGreaterThanOrEqual(4)
     const finalVisualEnd = Math.max(
       ...first.events.map((event) => event.atMs + event.durationMs / ORB_SPEED),
-    );
-    expect(finalVisualEnd).toBeGreaterThan(9_500);
-    expect(finalVisualEnd).toBeLessThanOrEqual(first.durationMs);
-  });
+    )
+    expect(finalVisualEnd).toBeGreaterThan(9_500)
+    expect(finalVisualEnd).toBeLessThanOrEqual(first.durationMs)
+  })
 
   it("keeps overlapping outcomes in separate bounded paint layers", () => {
     const timeline: PlaybackTimeline = {
@@ -87,28 +88,35 @@ describe("playback timeline", () => {
           label: "error",
         },
       ],
-    };
-    const paint = tracePaintAt(timeline, 200);
-    expect(paint.map((item) => item.kind)).toEqual(["error", "success"]);
-    expect(paint.every((item) => item.intensity > 0)).toBe(true);
-    expect(tracePaintAt(timeline, 2300)).toEqual([]);
-  });
+    }
+    const paint = tracePaintAt(timeline, 200)
+    expect(paint.map((item) => item.kind)).toEqual(["error", "success"])
+    expect(paint.every((item) => item.intensity > 0)).toBe(true)
+    expect(tracePaintAt(timeline, 2300)).toEqual([])
+  })
 
   it("shows representative rejections at the limiter", () => {
-    const config = defaultConfig();
-    config.scenario = "cyber";
-    config.controls.rateLimit = 50;
-    const timeline = createPlaybackTimeline(simulate(config));
+    const config = defaultConfig()
+    config.scenario = "cyber"
+    config.controls.rateLimit = 50
+    const timeline = createPlaybackTimeline(simulate(config))
     expect(
       timeline.events.some(
         (event) => event.edge === "client-limiter" && event.kind === "limited",
       ),
-    ).toBe(true);
-  });
+    ).toBe(true)
+  })
 
   it("returns exact final metrics", () => {
-    const metrics = simulate(defaultConfig()).metrics;
-    expect(metricsAt(metrics, 1)).toEqual(metrics);
-    expect(metricsAt(metrics, 0).completed).toBe(0);
-  });
-});
+    const metrics = simulate(defaultConfig()).metrics
+    expect(metricsAt(metrics, 1)).toEqual(metrics)
+    expect(metricsAt(metrics, 0).completed).toBe(0)
+  })
+
+  it("reveals service capacity progressively", () => {
+    const result = simulate(defaultConfig())
+    expect(resourcesAt(result, 0)).toEqual([])
+    expect(resourcesAt(result, 0.05)).toEqual(result.resourceTimeline[0])
+    expect(resourcesAt(result, 1)).toEqual(result.resourceTimeline.at(-1))
+  })
+})
