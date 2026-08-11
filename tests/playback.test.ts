@@ -12,6 +12,8 @@ import { defaultConfig, simulate } from "../src/domain/simulation";
 describe("derived topology", () => {
   it("adds and removes mechanism nodes from existing controls", () => {
     const config = defaultConfig();
+    config.controls.cache = true;
+    config.controls.rateLimit = 250;
     const enabled = deriveTopology(config, "closed");
     expect(enabled.nodes).toContain("cache");
     expect(enabled.nodes).toContain("limiter");
@@ -25,8 +27,13 @@ describe("derived topology", () => {
 
   it("anchors dependency mechanisms to the order service", () => {
     const config = defaultConfig();
+    config.controls.retries = 1;
+    config.controls.circuitBreaker = true;
     expect(deriveTopology(config, "closed").annotations).toContainEqual(
       expect.objectContaining({ target: "order", label: "1 retry" }),
+    );
+    expect(deriveTopology(config, "closed").annotations).toContainEqual(
+      expect.objectContaining({ target: "order-payment", label: "closed" }),
     );
   });
 });
@@ -42,6 +49,11 @@ describe("playback timeline", () => {
     expect(first.events.some((event) => event.edge === "queue-worker")).toBe(
       true,
     );
+    expect(
+      first.events.filter(
+        (event) => event.edge === "order-queue" && !event.reverse,
+      ).length,
+    ).toBeGreaterThanOrEqual(4);
     const finalVisualEnd = Math.max(
       ...first.events.map((event) => event.atMs + event.durationMs / ORB_SPEED),
     );

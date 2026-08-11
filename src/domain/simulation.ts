@@ -85,14 +85,14 @@ const DEFAULT_CONFIG: SimulationConfig = {
   scaling: "none",
   maxInstances: 4,
   controls: {
-    cache: true,
-    timeoutMs: 650,
-    retries: 1,
+    cache: false,
+    timeoutMs: 5000,
+    retries: 0,
     backoffMs: 90,
-    jitter: true,
-    circuitBreaker: true,
-    rateLimit: 250,
-    idempotency: true,
+    jitter: false,
+    circuitBreaker: false,
+    rateLimit: 1000,
+    idempotency: false,
   },
 };
 
@@ -312,7 +312,15 @@ export function simulate(input: SimulationConfig): SimulationResult {
       latencies.push(duration);
       completed += 1;
       if (outcome !== "success") failures += 1;
-      if (traces.length < 24 && (index === 0 || outcome !== "success"))
+      const representedOrders = traces.filter(
+        (trace) => trace.kind === "order",
+      ).length;
+      if (
+        traces.length < 24 &&
+        (index === 0 ||
+          outcome !== "success" ||
+          (kind === "order" && representedOrders < 6))
+      )
         traces.push({ id, kind, outcome, durationMs: duration, spans });
     }
 

@@ -76,3 +76,20 @@ Validation completed with formatting, lint, type checking, production build, 15 
 15 Playwright tests across desktop/mobile/320 px and an audit reporting 0 vulnerabilities.
 The in-app browser was unavailable for additional manual inspection. `currentTask.md` is
 included in this iteration's commit.
+
+## Follow-up iteration — progressive resilience guidance
+
+Completed on branch `agent/progressive-resilience-guidance`:
+
+- keep Queue and Worker, while reserving at least four representative successful orders in
+  playback so the asynchronous path is visible;
+- start with no optional resilience mechanisms enabled and use 5,000 ms as the documented
+  unprotected timeout ceiling;
+- hide customer preview and next-step guidance until playback produces evidence;
+- propose one missing resilience or capacity action at a time when degradation appears;
+- move the compact legend immediately below the diagram and before service capacity;
+- anchor circuit breaker on the dependency-call path rather than near Cache;
+- extend unit and browser coverage for these behaviors before PR and merge.
+
+Validation completed with formatting, lint, type checking, production build, 16 unit tests,
+18 Playwright tests across desktop/mobile/320 px and an audit reporting 0 vulnerabilities.

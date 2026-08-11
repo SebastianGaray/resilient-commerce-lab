@@ -2,6 +2,19 @@ import { describe, expect, it } from "vitest";
 import { compare, defaultConfig, simulate } from "../src/domain/simulation";
 
 describe("deterministic simulation", () => {
+  it("starts without resilience mechanisms", () => {
+    const config = defaultConfig();
+    expect(config.scaling).toBe("none");
+    expect(config.controls).toMatchObject({
+      cache: false,
+      retries: 0,
+      jitter: false,
+      circuitBreaker: false,
+      rateLimit: 1000,
+      idempotency: false,
+    });
+  });
+
   it("replays identical inputs exactly", () => {
     const config = defaultConfig();
     expect(simulate(config)).toEqual(simulate(config));
