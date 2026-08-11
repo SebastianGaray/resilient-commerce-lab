@@ -9,6 +9,7 @@ Public URL after the first validated deployment: <https://sebastiangaray.github.
 - Seeded discrete-event results with constant, ramp, burst and flash-sale traffic.
 - Fault injection for inventory, payments, cache and asynchronous workers.
 - Cache, timeout, retry/backoff/jitter, circuit-breaker, rate-limit and idempotency controls.
+- Live topology derived from those controls, with bounded color-coded request-flow playback.
 - Metrics, representative traces, baseline comparison and customer-impact preview derived from one run.
 - English and Spanish routes, true System/Light/Dark themes, reduced motion and mobile-first layout.
 

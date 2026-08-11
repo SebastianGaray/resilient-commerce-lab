@@ -24,8 +24,13 @@ The persistent label is **Simulation · Not production telemetry** / **Simulaci�
 - **RCL-A11Y-001** The experience is semantic, keyboard usable, non-color-dependent, reduced-motion compatible and understandable without animation.
 - **RCL-I18N-001** `/en/` and `/es/` have equivalent routes, controls, content, metadata and preserved destinations; `/` redirects to English.
 - **RCL-PERF-001** Logical request volume never creates one DOM node per request; rendering is sampled and bounded.
+- **RCL-PLAY-001** Play starts or resumes a deterministic visual replay; Pause freezes it; Restart returns to virtual time zero; 0.5×/1×/2× affect presentation time only. Single mode stops after one run and Continuous repeats the same seeded run with a visible explanation.
+- **RCL-TOPO-001** The diagram derives visible nodes, edges and mechanism annotations from existing controls and active fault state. It is not an arbitrary topology editor.
+- **RCL-FLOW-001** At most 12 simultaneous representative orbs communicate normal requests, successes, waiting/degradation, errors/timeouts, retries, limiting, cache hits and cache misses through color plus shape/border and a textual equivalent.
 - **RCL-DEP-001** The public application builds statically under `/resilient-commerce-lab/` with no backend, secrets, tracking or paid runtime service.
 
 ## Acceptance criteria
 
 Requirements are complete only when implementation, focused tests, browser evidence and documentation agree. The app must work without horizontal page overflow from 20rem upward, keep controls touch-sized, expose all information under reduced motion and clearly distinguish simulated, local-reference and production-context material.
+
+Playback must never change logical results. At completion, displayed metrics equal the full deterministic run. Reduced-motion mode replaces moving orbs with active-edge and event-state updates.

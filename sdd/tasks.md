@@ -44,3 +44,10 @@
 
 - [x] **T080** (`RCL-DEP-001`) Validate, publish through a protected PR, deploy and smoke-test with authorization.
 - [x] **T081** (`RCL-DEP-001`) Verify effective ruleset and actual required checks.
+
+## M10 — Request-flow playback
+
+- [x] **T090** (`RCL-PLAY-001`, `RCL-FLOW-001`) Build deterministic bounded playback timeline and partial snapshots.
+- [x] **T091** (`RCL-TOPO-001`) Derive visible topology and annotations from controls and faults.
+- [x] **T092** (`RCL-PLAY-001`, `RCL-FLOW-001`, `RCL-A11Y-001`) Add Play/Pause/Restart, speed, modes, orbs, legend and reduced-motion equivalent.
+- [x] **T093** (`RCL-I18N-001`, `RCL-PERF-001`) Validate locale parity, themes, desktop, 20rem and bounded rendering.
