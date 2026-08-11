@@ -18,7 +18,7 @@ for (const locale of ["en", "es"] as const) {
     await page.locator('input[name="intensity"]').fill("90");
     await page
       .getByRole("button", {
-        name: locale === "en" ? "Run simulation" : "Ejecutar simulación",
+        name: locale === "en" ? "Play" : "Reproducir",
       })
       .click();
     await expect(page.locator("[data-traces] details").first()).toBeVisible();
@@ -48,4 +48,34 @@ test("theme choice persists and portfolio return is the final menu link", async 
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".nav-menu nav a").last()).toHaveText("Portfolio");
+});
+
+test("playback animates bounded orbs, pauses and derives topology", async ({
+  page,
+}) => {
+  await page.goto("en/");
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.waitForTimeout(650);
+  const progress = await page
+    .locator("[data-playback-progress]")
+    .getAttribute("value");
+  expect(Number(progress)).toBeGreaterThan(0);
+  expect(await page.locator("[data-orbs] > *").count()).toBeLessThanOrEqual(12);
+  await page.getByRole("button", { name: "Pause" }).click();
+  const pausedTime = await page.locator("[data-playback-time]").innerText();
+  await page.waitForTimeout(250);
+  await expect(page.locator("[data-playback-time]")).toHaveText(pausedTime);
+  await page.locator('input[name="cache"]').uncheck();
+  await expect(page.locator('[data-node="cache"]')).toHaveAttribute(
+    "hidden",
+    "",
+  );
+  await page.locator('input[name="limit"]').fill("120");
+  await page.locator('input[name="limit"]').press("Tab");
+  await expect(page.locator('[data-node="limiter"]')).toHaveAttribute(
+    "hidden",
+    "",
+  );
+  await page.locator('select[name="mode"]').selectOption("continuous");
+  await expect(page.locator("[data-loop-note]")).toBeVisible();
 });

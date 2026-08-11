@@ -6,11 +6,15 @@ Astro produces static EN/ES routes. Strict TypeScript domain modules own a virtu
 
 The public topology is Client → API Gateway → Order Service → Inventory and Payment, with Order Service → Cache and Order Service → Queue → Worker. Responsive semantic HTML and SVG present sampled request flow; the customer preview and baseline comparison derive from the same result.
 
+`DerivedTopology` maps existing configuration to visible nodes, edges and annotations. `PlaybackTimeline` maps a bounded deterministic trace sample to visual events. `PlaybackController` translates virtual time to presentation time for play, pause, restart, speed and same-seed continuous replay. None of these modules feeds back into simulation results.
+
 ## Model
 
 Events use `(time, sequence)` ordering. A documented seeded generator controls latency, errors and jitter. Traffic is bounded per run. Queue capacity and worker service rate create backpressure. Timeouts race dependencies; retries are bounded and scheduled with exponential backoff plus seeded jitter. Circuit state transitions are explicit. Token-bucket limiting and idempotency records are deterministic.
 
 Metrics aggregate completed events and latency histograms. Traces retain a bounded representative sample. Percentiles use a documented nearest-rank rule. Baseline/current comparison replays identical arrivals and random stream partitions.
+
+The SVG renderer caps concurrent orbs at 12 and uses edge paths for motion. Event kind is encoded by color plus class-specific outline/shape and repeated in an accessible activity log. Reduced motion disables path travel while preserving edge, node and textual state changes.
 
 ## Interface and content
 

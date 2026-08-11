@@ -6,4 +6,6 @@ The persistent header order is theme disclosure, EN/ES, repository utility and M
 
 Architecture nodes are bordered surfaces. Edges use labels, line style and state text in addition to color. Warning, failure and success colors are local semantic additions tested in both themes. Animated particles are bounded representative samples, never one per request. Reduced motion removes travel while retaining edge state and counts.
 
+The topology is a projection of simulator state, not a second editor. Cache and limiter nodes appear only when their existing controls require them; faults and resilience mechanisms become annotations. Play runs one deterministic timeline, continuous mode loops that same seeded run, and Pause/Restart preserve a predictable playback contract. A persistent legend maps orb color and shape to requests, responses, waits, failures, retries, rate-limit rejections and cache outcomes.
+
 Operational metrics use monospace values and plain-language labels. Traces use a vertical timing list on narrow screens. The customer preview remains subordinate to the simulator and always carries a simulated label. Panels reflow without horizontal page scroll at the supported 20rem minimum.
