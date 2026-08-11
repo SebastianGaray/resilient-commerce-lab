@@ -80,7 +80,7 @@ const DEFAULT_CONFIG: SimulationConfig = {
     backoffMs: 90,
     jitter: true,
     circuitBreaker: true,
-    rateLimit: 48,
+    rateLimit: 250,
     idempotency: true,
   },
 };

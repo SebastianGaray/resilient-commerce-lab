@@ -356,6 +356,9 @@ legend {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem;
 }
+.playback-options {
+  grid-template-columns: 1fr;
+}
 .playback-options small {
   grid-column: 1 / -1;
   color: var(--text-muted);
@@ -403,6 +406,41 @@ legend {
   stroke: var(--accent);
   stroke-width: 5;
   stroke-dasharray: none;
+}
+.trace-layer {
+  fill: none;
+  stroke-width: var(--trace-width);
+  stroke-linecap: round;
+  stroke-dasharray: 1 8;
+  opacity: var(--trace-opacity);
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 160ms ease,
+    stroke-width 160ms ease;
+}
+.trace-success {
+  stroke: var(--success);
+}
+.trace-error {
+  stroke: var(--danger);
+}
+.trace-wait {
+  stroke: var(--warning);
+}
+.trace-limited {
+  stroke: var(--text-muted);
+}
+.paint-summary {
+  height: 4.5rem;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.65rem;
+  overflow-y: auto;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-secondary);
+  font:
+    0.68rem/1.45 "JetBrains Mono",
+    monospace;
 }
 .nodes rect {
   fill: var(--surface);
@@ -758,5 +796,8 @@ legend {
   }
   .orbs {
     display: none;
+  }
+  .trace-layer {
+    transition: none;
   }
 }

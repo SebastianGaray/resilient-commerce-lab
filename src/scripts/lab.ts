@@ -8,7 +8,9 @@ import {
   createPlaybackTimeline,
   deriveTopology,
   metricsAt,
+  tracePaintAt,
   type FlowKind,
+  type PaintKind,
   type PlaybackEvent,
   type PlaybackTimeline,
 } from "../domain/playback";
@@ -171,6 +173,7 @@ let previousFrame = 0;
 let frameHandle = 0;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const svgNamespace = "http://www.w3.org/2000/svg";
+const orbSpeed = 0.5;
 
 function renderTopology(): void {
   const topology = deriveTopology(
@@ -280,7 +283,7 @@ function renderOrbs(active: PlaybackEvent[]): void {
     if (!path || path.hasAttribute("hidden")) return;
     const fraction = Math.max(
       0,
-      Math.min(1, (virtualMs - event.atMs) / event.durationMs),
+      Math.min(1, (virtualMs - event.atMs) / (event.durationMs / orbSpeed)),
     );
     const point = path.getPointAtLength(
       path.getTotalLength() * (event.reverse ? 1 - fraction : fraction),
@@ -293,14 +296,75 @@ function renderOrbs(active: PlaybackEvent[]): void {
   });
 }
 
+function renderTracePaint(): void {
+  const layer = document.querySelector<SVGGElement>("[data-trace-paint]");
+  if (!layer) return;
+  layer.replaceChildren();
+  const paint = tracePaintAt(timeline, virtualMs);
+  const offsets: Record<PaintKind, number> = {
+    success: -5,
+    error: -1.5,
+    wait: 2,
+    limited: 5.5,
+  };
+  paint.forEach((item) => {
+    const source = document.querySelector<SVGPathElement>(
+      `[data-edge="${item.edge}"]`,
+    );
+    const d = source?.getAttribute("d");
+    if (!source || !d || source.hasAttribute("hidden")) return;
+    const path = document.createElementNS(svgNamespace, "path");
+    path.setAttribute("d", d);
+    path.setAttribute("class", `trace-layer trace-${item.kind}`);
+    path.setAttribute("transform", `translate(0 ${offsets[item.kind]})`);
+    path.style.setProperty(
+      "--trace-opacity",
+      String(0.12 + item.intensity * 0.58),
+    );
+    path.style.setProperty("--trace-width", String(4 + item.intensity * 9));
+    layer.append(path);
+  });
+  const summary = document.querySelector<HTMLElement>("[data-paint-summary]");
+  if (!summary) return;
+  if (paint.length === 0) {
+    summary.textContent =
+      locale === "es"
+        ? "Sin resultados recientes en las conexiones."
+        : "No recent connection outcomes.";
+    return;
+  }
+  const kindNames: Record<PaintKind, string> =
+    locale === "es"
+      ? {
+          success: "correctas",
+          error: "errores",
+          wait: "esperas",
+          limited: "limitadas",
+        }
+      : {
+          success: "successes",
+          error: "errors",
+          wait: "waits",
+          limited: "limited",
+        };
+  const details = [...paint]
+    .sort((a, b) => b.intensity - a.intensity)
+    .slice(0, 4)
+    .map((item) => `${item.edge}: ${item.count} ${kindNames[item.kind]}`)
+    .join(" · ");
+  summary.textContent = `${locale === "es" ? "Pintura reciente" : "Recent paint"}: ${details}`;
+}
+
 function renderPlayback(): void {
   document
     .querySelectorAll<SVGPathElement>("[data-edge]")
     .forEach((edge) => edge.classList.remove("active"));
   const active = timeline.events.filter(
     (event) =>
-      virtualMs >= event.atMs && virtualMs < event.atMs + event.durationMs,
+      virtualMs >= event.atMs &&
+      virtualMs < event.atMs + event.durationMs / orbSpeed,
   );
+  renderTracePaint();
   renderOrbs(active);
   if (reducedMotion.matches)
     active.forEach((event) =>
@@ -352,10 +416,9 @@ function prepare(autoplay: boolean): void {
 function tick(timestamp: number): void {
   if (!playing) return;
   if (previousFrame === 0) previousFrame = timestamp;
-  const speed = Number(selected("speed").value);
   virtualMs = Math.min(
     timeline.durationMs,
-    virtualMs + (timestamp - previousFrame) * speed,
+    virtualMs + (timestamp - previousFrame),
   );
   previousFrame = timestamp;
   renderPlayback();
@@ -393,7 +456,6 @@ document.querySelector("[data-restart]")?.addEventListener("click", () => {
 });
 form?.addEventListener("change", (event) => {
   const target = event.target as HTMLInputElement | HTMLSelectElement;
-  if (target.name === "speed") return;
   const loopNote = document.querySelector<HTMLElement>("[data-loop-note]");
   if (target.name === "mode") {
     if (loopNote) loopNote.hidden = target.value !== "continuous";

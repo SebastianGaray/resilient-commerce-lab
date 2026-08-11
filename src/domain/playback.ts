@@ -62,6 +62,15 @@ export interface PlaybackTimeline {
   sampledRequests: number;
 }
 
+export type PaintKind = "success" | "error" | "wait" | "limited";
+
+export interface TracePaint {
+  edge: EdgeId;
+  kind: PaintKind;
+  count: number;
+  intensity: number;
+}
+
 export const deriveTopology = (
   config: SimulationConfig,
   circuitState: SimulationMetrics["circuitState"],
@@ -162,7 +171,7 @@ export function createPlaybackTimeline(
   traces.forEach((trace, traceIndex) => {
     const base = traceIndex * spacing;
     const requestEdges: EdgeId[] =
-      result.config.controls.rateLimit < 120
+      result.config.controls.rateLimit < 1000
         ? ["client-limiter", "limiter-gateway", "gateway-order"]
         : ["client-gateway", "gateway-order"];
     requestEdges.forEach((edge, edgeIndex) =>
@@ -235,7 +244,7 @@ export function createPlaybackTimeline(
       }),
     );
   });
-  if (result.metrics.limited > 0 && result.config.controls.rateLimit < 120) {
+  if (result.metrics.limited > 0 && result.config.controls.rateLimit < 1000) {
     const limitedCount = Math.min(3, result.metrics.limited);
     for (let index = 0; index < limitedCount; index += 1) {
       events.push({
@@ -250,15 +259,51 @@ export function createPlaybackTimeline(
       });
     }
   }
-  const durationMs = Math.max(
-    2400,
-    ...events.map((event) => event.atMs + event.durationMs + 500),
-  );
   return {
-    durationMs,
+    durationMs: 10_000,
     events: events.sort((a, b) => a.atMs - b.atMs || a.id.localeCompare(b.id)),
     sampledRequests: traces.length,
   };
+}
+
+const paintKind = (kind: FlowKind): PaintKind | undefined => {
+  if (kind === "success" || kind === "cache-hit") return "success";
+  if (kind === "error") return "error";
+  if (kind === "wait" || kind === "retry" || kind === "cache-miss")
+    return "wait";
+  if (kind === "limited") return "limited";
+  return undefined;
+};
+
+export function tracePaintAt(
+  timeline: PlaybackTimeline,
+  virtualMs: number,
+  windowMs = 2000,
+): TracePaint[] {
+  const aggregates = new Map<string, { count: number; weight: number }>();
+  timeline.events.forEach((event) => {
+    const kind = paintKind(event.kind);
+    const age = virtualMs - event.atMs;
+    if (!kind || age < 0 || age > windowMs) return;
+    const key = `${event.edge}:${kind}`;
+    const current = aggregates.get(key) ?? { count: 0, weight: 0 };
+    current.count += 1;
+    current.weight += 1 - age / windowMs;
+    aggregates.set(key, current);
+  });
+  return [...aggregates.entries()]
+    .map(([key, value]) => {
+      const [edge, kind] = key.split(":") as [EdgeId, PaintKind];
+      return {
+        edge,
+        kind,
+        count: value.count,
+        intensity: Math.min(1, Math.round((value.weight / 3) * 100) / 100),
+      };
+    })
+    .sort(
+      (a, b) => a.edge.localeCompare(b.edge) || a.kind.localeCompare(b.kind),
+    );
 }
 
 export const metricsAt = (

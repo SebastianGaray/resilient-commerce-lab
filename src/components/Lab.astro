@@ -229,13 +229,12 @@ const faults = Object.entries(copy.faults);
               }</label
             >
             <label
-              >{copy.limit}<input
-                name="limit"
-                type="number"
-                min="1"
-                max="1000"
-                value="48"
-              /></label
+              >{copy.limit}<select name="limit"
+                ><option value="1000">{copy.rateLimits.none}</option><option
+                  value="50">{copy.rateLimits.low}</option
+                ><option value="250" selected>{copy.rateLimits.medium}</option
+                ><option value="500">{copy.rateLimits.high}</option></select
+              ></label
             >
             <label class="check"
               ><input name="idempotency" type="checkbox" checked />{
@@ -244,13 +243,6 @@ const faults = Object.entries(copy.faults);
             >
           </fieldset>
           <div class="playback-options">
-            <label
-              >{copy.playback.speed}<select name="speed"
-                ><option value="0.5">0.5×</option><option value="1" selected
-                  >1×</option
-                ><option value="2">2×</option></select
-              ></label
-            >
             <label
               >{copy.playback.mode}<select name="mode"
                 ><option value="single">{copy.playback.single}</option><option
@@ -314,6 +306,7 @@ const faults = Object.entries(copy.faults);
                 >Client to gateway and order service, then inventory, payment,
                 cache and asynchronous worker.</desc
               >
+              <g class="trace-paint" data-trace-paint aria-hidden="true"></g>
               <g class="edges"
                 ><path data-edge="client-limiter" d="M105 180H135"></path><path
                   data-edge="limiter-gateway"
@@ -375,6 +368,14 @@ const faults = Object.entries(copy.faults);
               <g class="orbs" data-orbs aria-hidden="true"></g>
               <g class="diagram-badges" data-annotations aria-hidden="true"></g>
             </svg>
+            <p
+              class="paint-summary"
+              data-paint-summary
+              aria-live="polite"
+              tabindex="0"
+            >
+              {copy.playback.paintEmpty}
+            </p>
             <div class="flow-legend" aria-label={copy.playback.legend}>
               <strong>{copy.playback.legend}</strong><ul>
                 {
