@@ -73,3 +73,11 @@
 - [x] **T122** (`RCL-RES-001`, `RCL-HELP-001`) Group controls by request order and document formulas with official source links.
 - [x] **T123** (`RCL-TOPO-001`, `RCL-FLOW-001`) Keep resource capacity textual, remove recent-paint prose and preserve visual paint.
 - [x] **T124** (`RCL-I18N-001`, `RCL-PERF-001`) Validate deterministic scenarios, scaling effects, accessibility and responsive rendering.
+
+## M14 — Playback clarity and bounded scaling
+
+- [x] **T130** (`RCL-PLAY-001`) Fit all half-speed request motion into the complete ten-second playback window.
+- [x] **T131** (`RCL-A11Y-001`, `RCL-FLOW-001`) Consolidate playback into one Play/Pause action and a collapsed four-category legend.
+- [x] **T132** (`RCL-CX-001`) Add localized, configuration-aware next-step guidance to the customer preview.
+- [x] **T133** (`RCL-CAP-001`) Expose horizontal replica caps and a relative capacity footprint.
+- [x] **T134** (`RCL-I18N-001`, `RCL-PERF-001`) Validate timing, guidance, accessibility and responsive rendering.

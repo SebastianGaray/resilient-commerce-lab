@@ -18,12 +18,12 @@ const en = {
   controls: "Simulation controls",
   traffic: "Traffic scenario",
   scaling: "Capacity scaling",
+  maxInstances: "Maximum horizontal instances",
   seed: "Seed",
   run: "Run simulation",
   playback: {
     play: "Play",
     pause: "Pause",
-    restart: "Restart",
     mode: "Playback mode",
     single: "Single run",
     continuous: "Continuous",
@@ -40,12 +40,8 @@ const en = {
   flowLegend: {
     request: "Request",
     success: "Success response",
-    wait: "Wait or degradation",
-    error: "Error or timeout",
-    retry: "Retry",
-    limited: "Rate limited",
-    hit: "Cache hit",
-    miss: "Cache miss",
+    wait: "Delay, retry or cache miss",
+    error: "Error, timeout or rejection",
   },
   help: {
     open: "Open help",
@@ -60,7 +56,15 @@ const en = {
       ],
       [
         "Capacity scaling",
-        "None keeps one standard instance. Horizontal automatically adds up to eight instances around a 70% CPU target. Vertical keeps one instance with 2× CPU and memory capacity.",
+        "None keeps one standard instance. Horizontal adds instances around a 70% CPU target up to the selected maximum. Vertical keeps one instance with 2× CPU and memory capacity.",
+      ],
+      [
+        "Maximum horizontal instances",
+        "Caps automatic replicas per service. A lower cap bounds capacity cost but can leave overload unresolved.",
+      ],
+      [
+        "Capacity footprint",
+        "Counts standard instance equivalents across visible services. It exposes the scaling tradeoff without estimating provider-specific prices.",
       ],
       ["Seed", "Reproduces the same generated latencies and outcomes."],
       ["Cache", "Lets browse requests avoid an inventory call on a hit."],
@@ -98,7 +102,7 @@ const en = {
       ],
       [
         "Horizontal",
-        "desired instances = ceil(demand ÷ (per-instance capacity × 0.70)), bounded from 1 to 8.",
+        "desired instances = ceil(demand ÷ (per-instance capacity × 0.70)), bounded by the selected maximum.",
       ],
       [
         "Vertical",
@@ -257,12 +261,12 @@ const es = {
   controls: "Controles de simulación",
   traffic: "Escenario de tráfico",
   scaling: "Escalado de capacidad",
+  maxInstances: "Máximo de instancias horizontales",
   seed: "Semilla",
   run: "Ejecutar simulación",
   playback: {
     play: "Reproducir",
     pause: "Pausar",
-    restart: "Reiniciar",
     mode: "Modo de reproducción",
     single: "Una ejecución",
     continuous: "Continuo",
@@ -279,12 +283,8 @@ const es = {
   flowLegend: {
     request: "Solicitud",
     success: "Respuesta correcta",
-    wait: "Espera o degradación",
-    error: "Error o timeout",
-    retry: "Reintento",
-    limited: "Limitada",
-    hit: "Acierto de caché",
-    miss: "Fallo de caché",
+    wait: "Demora, reintento o fallo de caché",
+    error: "Error, timeout o rechazo",
   },
   help: {
     open: "Abrir ayuda",
@@ -299,7 +299,15 @@ const es = {
       ],
       [
         "Escalado de capacidad",
-        "Sin escalado mantiene una instancia estándar. Horizontal agrega automáticamente hasta ocho instancias alrededor de 70% de CPU. Vertical mantiene una instancia con 2× capacidad de CPU y memoria.",
+        "Sin escalado mantiene una instancia estándar. Horizontal agrega instancias alrededor de 70% de CPU hasta el máximo elegido. Vertical mantiene una instancia con 2× capacidad de CPU y memoria.",
+      ],
+      [
+        "Máximo de instancias horizontales",
+        "Acota las réplicas automáticas por servicio. Un máximo menor limita el coste de capacidad, pero puede dejar sobrecarga sin resolver.",
+      ],
+      [
+        "Huella de capacidad",
+        "Cuenta equivalentes de instancia estándar entre los servicios visibles. Expone el compromiso del escalado sin estimar precios de un proveedor.",
       ],
       ["Semilla", "Reproduce las mismas latencias y resultados generados."],
       [
@@ -343,7 +351,7 @@ const es = {
       ],
       [
         "Horizontal",
-        "instancias deseadas = ceil(demanda ÷ (capacidad por instancia × 0,70)), acotadas entre 1 y 8.",
+        "instancias deseadas = ceil(demanda ÷ (capacidad por instancia × 0,70)), acotadas por el máximo elegido.",
       ],
       [
         "Vertical",

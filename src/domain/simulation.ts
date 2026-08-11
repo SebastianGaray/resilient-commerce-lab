@@ -20,6 +20,7 @@ export interface SimulationConfig {
   durationMs: number;
   scenario: TrafficScenario;
   scaling: ScalingStrategy;
+  maxInstances: number;
   controls: {
     cache: boolean;
     timeoutMs: number;
@@ -82,6 +83,7 @@ const DEFAULT_CONFIG: SimulationConfig = {
   durationMs: 10_000,
   scenario: "normal",
   scaling: "none",
+  maxInstances: 4,
   controls: {
     cache: true,
     timeoutMs: 650,
@@ -153,6 +155,7 @@ export function simulate(input: SimulationConfig): SimulationResult {
     const capacity = capacityAt(
       config.scenario,
       config.scaling,
+      config.maxInstances,
       accepted,
       config.controls.cache,
       queueDepth,

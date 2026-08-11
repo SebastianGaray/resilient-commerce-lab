@@ -194,6 +194,12 @@ const scalingOptions = Object.entries(copy.scalingOptions);
               }</select
             ></label
           >
+          <label data-horizontal-limit hidden
+            >{copy.maxInstances}<select name="maxInstances"
+              ><option value="2">2</option><option value="4" selected>4</option
+              ><option value="8">8</option></select
+            ></label
+          >
           <label
             >{copy.seed}<input
               name="seed"
@@ -266,14 +272,13 @@ const scalingOptions = Object.entries(copy.scalingOptions);
             <small data-loop-note hidden>{copy.playback.loopNote}</small>
           </div>
           <div class="playback-actions">
-            <button class="primary" type="submit" data-play
-              >{copy.playback.play}</button
-            >
-            <button class="secondary" type="button" data-pause
-              >{copy.playback.pause}</button
-            >
-            <button class="secondary" type="button" data-restart
-              >{copy.playback.restart}</button
+            <button
+              class="primary"
+              type="submit"
+              data-play
+              data-play-label={copy.playback.play}
+              data-pause-label={copy.playback.pause}
+              aria-pressed="false">{copy.playback.play}</button
             >
           </div>
         </form>
@@ -382,14 +387,14 @@ const scalingOptions = Object.entries(copy.scalingOptions);
               <g class="diagram-badges" data-annotations aria-hidden="true"></g>
             </svg>
             <div class="resource-summary">
-              <strong>{copy.resources.title}</strong><div
-                data-resources
-                aria-live="polite"
+              <strong>{copy.resources.title}</strong><p
+                class="capacity-cost"
+                data-capacity-cost
               >
-              </div>
+              </p><div data-resources aria-live="polite"></div>
             </div>
-            <div class="flow-legend" aria-label={copy.playback.legend}>
-              <strong>{copy.playback.legend}</strong><ul>
+            <details class="flow-legend">
+              <summary>{copy.playback.legend}</summary><ul>
                 {
                   Object.entries(copy.flowLegend).map(([kind, label]) => (
                     <li>
@@ -399,7 +404,7 @@ const scalingOptions = Object.entries(copy.scalingOptions);
                   ))
                 }
               </ul>
-            </div>
+            </details>
             <div class="activity" aria-live="polite">
               <strong>{copy.activity}</strong><ul data-activity></ul>
             </div>
@@ -409,7 +414,12 @@ const scalingOptions = Object.entries(copy.scalingOptions);
               <p class="eyebrow">{copy.simulated}</p><h2 id="customer-title">
                 {copy.customer}
               </h2>
-            </div><div data-customer-state class="customer-card"></div>
+            </div><div data-customer-state class="customer-card"></div><aside
+              class="recommendation"
+              data-recommendation
+              aria-live="polite"
+            >
+            </aside>
           </section>
         </div>
       </section>

@@ -62,11 +62,16 @@ const scale = (
   strategy: ScalingStrategy,
   demand: number,
   perInstance: number,
+  maxInstances: number,
 ): { instances: number; multiplier: number } => {
   if (strategy === "vertical") return { instances: 1, multiplier: 2 };
   if (strategy === "horizontal")
     return {
-      instances: clamp(Math.ceil(demand / (perInstance * 0.7)), 1, 8),
+      instances: clamp(
+        Math.ceil(demand / (perInstance * 0.7)),
+        1,
+        maxInstances,
+      ),
       multiplier: 1,
     };
   return { instances: 1, multiplier: 1 };
@@ -75,6 +80,7 @@ const scale = (
 export function capacityAt(
   scenario: TrafficScenario,
   strategy: ScalingStrategy,
+  maxInstances: number,
   accepted: number,
   cacheEnabled: boolean,
   queueDepth: number,
@@ -95,7 +101,12 @@ export function capacityAt(
   const resources: ResourceSnapshot[] = [];
   const pressure = {} as Record<ServiceId, ServicePressure>;
   (Object.keys(baseCapacity) as ServiceId[]).forEach((service) => {
-    const scaled = scale(strategy, demands[service], baseCapacity[service]);
+    const scaled = scale(
+      strategy,
+      demands[service],
+      baseCapacity[service],
+      maxInstances,
+    );
     const capacity =
       baseCapacity[service] * scaled.instances * scaled.multiplier;
     const utilization = capacity === 0 ? 0 : demands[service] / capacity;
