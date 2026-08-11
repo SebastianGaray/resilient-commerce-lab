@@ -16,6 +16,8 @@ Metrics aggregate completed events and latency histograms. Traces retain a bound
 
 The SVG renderer caps concurrent orbs at 12 and uses edge paths for motion. Event kind is encoded by color plus class-specific outline/shape and repeated in an accessible activity log. Reduced motion disables path travel while preserving edge, node and textual state changes.
 
+The simulator accepts up to 1,000 arrivals and accepted requests per second, but retains only bounded trace and playback samples. SVG mechanism badges use predefined anchor coordinates for each node or edge. Native popovers provide localized section-level glossaries, and the activity region reserves five rows while rendering only the latest five events.
+
 ## Interface and content
 
 The shared warm-neutral palette, Source Serif 4/Inter/JetBrains Mono roles, compact theme disclosure, EN/ES switch and Menu/Menú disclosure are implemented locally. Portfolio/Portafolio is the final navigation destination. The layout is mobile-first at 20rem and uses container queries where panels benefit.

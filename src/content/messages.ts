@@ -44,6 +44,61 @@ const en = {
     hit: "Cache hit",
     miss: "Cache miss",
   },
+  help: {
+    open: "Open help",
+    close: "Close",
+    controlsTitle: "About the controls",
+    controlsIntro:
+      "These inputs configure one deterministic simulation. They do not send real traffic.",
+    controlsItems: [
+      [
+        "Requests per second",
+        "Arrivals offered each simulated second, from 4 to 1,000.",
+      ],
+      [
+        "Traffic pattern",
+        "Changes how arrivals vary during the ten-second run.",
+      ],
+      ["Seed", "Reproduces the same generated latencies and outcomes."],
+      [
+        "Injected fault",
+        "Chooses the dependency whose latency and errors degrade.",
+      ],
+      [
+        "Fault intensity",
+        "Controls the probability and latency impact of that fault.",
+      ],
+      ["Cache", "Lets browse requests avoid an inventory call on a hit."],
+      ["Timeout", "Stops a dependency attempt after the selected duration."],
+      [
+        "Bounded retries",
+        "Repeats a failed dependency attempt up to this limit.",
+      ],
+      [
+        "Backoff jitter",
+        "Adds seeded variation between retries to spread load.",
+      ],
+      [
+        "Circuit breaker",
+        "Stops dependency calls after repeated failures, then probes recovery.",
+      ],
+      [
+        "Rate limit",
+        "Rejects arrivals above this per-second capacity before downstream work.",
+      ],
+      [
+        "Idempotency",
+        "Suppresses the simulated duplicate queue effect for orders.",
+      ],
+      [
+        "Playback",
+        "Changes only how the deterministic result is presented, not its outcome.",
+      ],
+    ],
+    architectureTitle: "How to read the diagram",
+    architectureIntro:
+      "Nodes and connections come from the controls. Bubbles sit where each mechanism or fault acts; moving shapes are a bounded sample, not one shape per request.",
+  },
   patterns: {
     constant: "Constant",
     ramp: "Ramp",
@@ -181,6 +236,67 @@ const es = {
     limited: "Limitada",
     hit: "Acierto de caché",
     miss: "Fallo de caché",
+  },
+  help: {
+    open: "Abrir ayuda",
+    close: "Cerrar",
+    controlsTitle: "Acerca de los controles",
+    controlsIntro:
+      "Estas entradas configuran una simulación determinista. No envían tráfico real.",
+    controlsItems: [
+      [
+        "Solicitudes por segundo",
+        "Llegadas ofrecidas por segundo simulado, entre 4 y 1.000.",
+      ],
+      [
+        "Patrón de tráfico",
+        "Cambia cómo varían las llegadas durante los diez segundos.",
+      ],
+      ["Semilla", "Reproduce las mismas latencias y resultados generados."],
+      [
+        "Fallo inyectado",
+        "Elige la dependencia cuya latencia y errores se degradan.",
+      ],
+      [
+        "Intensidad del fallo",
+        "Controla la probabilidad y el impacto de latencia del fallo.",
+      ],
+      [
+        "Caché",
+        "Permite que consultas eviten inventario cuando hay un acierto.",
+      ],
+      [
+        "Timeout",
+        "Detiene un intento de dependencia al superar la duración elegida.",
+      ],
+      [
+        "Reintentos acotados",
+        "Repite un intento fallido hasta el límite indicado.",
+      ],
+      [
+        "Jitter del backoff",
+        "Agrega variación determinista entre reintentos para distribuir carga.",
+      ],
+      [
+        "Circuit breaker",
+        "Detiene llamadas tras fallos repetidos y luego prueba la recuperación.",
+      ],
+      [
+        "Límite de tasa",
+        "Rechaza llegadas sobre esta capacidad antes del trabajo downstream.",
+      ],
+      [
+        "Idempotencia",
+        "Evita el efecto simulado de duplicados en la cola de pedidos.",
+      ],
+      [
+        "Reproducción",
+        "Solo cambia cómo se presenta el resultado, no su resultado lógico.",
+      ],
+    ],
+    architectureTitle: "Cómo leer el diagrama",
+    architectureIntro:
+      "Los nodos y conexiones provienen de los controles. Las burbujas se ubican donde actúa cada mecanismo o fallo; las figuras móviles son una muestra acotada, no una por solicitud.",
   },
   patterns: {
     constant: "Constante",

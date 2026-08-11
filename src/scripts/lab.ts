@@ -190,14 +190,63 @@ function renderTopology(): void {
     );
     edge.classList.remove("active");
   });
-  const annotations = document.querySelector<HTMLElement>("[data-annotations]");
-  if (annotations)
-    annotations.innerHTML = topology.annotations
-      .map(
-        (item) =>
-          `<span data-state="${item.state}"><strong>${item.target}</strong> ${item.label}</span>`,
-      )
-      .join("");
+  const annotations = document.querySelector<SVGGElement>("[data-annotations]");
+  if (!annotations) return;
+  annotations.replaceChildren();
+  const anchors: Record<string, [number, number]> = {
+    limiter: [170, 132],
+    "order-inventory": [555, 126],
+    "order-payment": [555, 226],
+    "order-queue": [470, 250],
+    cache: [445, 24],
+    inventory: [675, 30],
+    payment: [675, 140],
+    worker: [695, 250],
+  };
+  const counts = new Map<string, number>();
+  topology.annotations.forEach((item) => {
+    const anchor = anchors[item.target];
+    if (!anchor) return;
+    const stack = counts.get(item.target) ?? 0;
+    counts.set(item.target, stack + 1);
+    const label = localizeAnnotation(item.label);
+    const width = Math.max(78, Math.min(154, label.length * 7 + 20));
+    const group = document.createElementNS(svgNamespace, "g");
+    group.setAttribute("class", "diagram-badge");
+    group.dataset.state = item.state;
+    group.setAttribute(
+      "transform",
+      `translate(${anchor[0] - width / 2} ${anchor[1] - stack * 28})`,
+    );
+    const rect = document.createElementNS(svgNamespace, "rect");
+    rect.setAttribute("width", String(width));
+    rect.setAttribute("height", "22");
+    rect.setAttribute("rx", "11");
+    const labelNode = document.createElementNS(svgNamespace, "text");
+    labelNode.setAttribute("x", String(width / 2));
+    labelNode.setAttribute("y", "15");
+    labelNode.textContent = label;
+    group.append(rect, labelNode);
+    annotations.append(group);
+  });
+}
+
+function localizeAnnotation(label: string): string {
+  if (label.startsWith("\u2264"))
+    return `${locale === "es" ? "LÃ­mite" : "Rate"} ${label}`;
+  if (label.endsWith("retry")) {
+    const count = label.split(" ")[0];
+    return `${locale === "es" ? "Reintentos" : "Retries"}: ${count}`;
+  }
+  if (["closed", "open", "half-open"].includes(label))
+    return `${locale === "es" ? "Circuito" : "Circuit breaker"}: ${label}`;
+  if (label === "idempotent")
+    return locale === "es" ? "Idempotencia" : "Idempotency";
+  if (label.endsWith("fault")) {
+    const intensity = label.split("%")[0];
+    return `${locale === "es" ? "Fallo" : "Fault"}: ${intensity}%`;
+  }
+  return label;
 }
 
 function orbShape(kind: FlowKind): SVGElement {
@@ -270,8 +319,8 @@ function renderPlayback(): void {
   if (activity)
     activity.innerHTML = (
       active.length
-        ? active
-        : timeline.events.filter((event) => event.atMs <= virtualMs).slice(-4)
+        ? active.slice(-5)
+        : timeline.events.filter((event) => event.atMs <= virtualMs).slice(-5)
     )
       .map(
         (event) =>

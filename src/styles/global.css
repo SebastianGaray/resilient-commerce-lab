@@ -229,7 +229,59 @@ main > section {
   padding: 1.25rem;
 }
 .section-heading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
   margin-bottom: 1.25rem;
+}
+.section-heading .eyebrow,
+.section-heading h2 {
+  grid-column: 1;
+}
+.section-heading .eyebrow {
+  grid-row: 1;
+}
+.section-heading h2 {
+  grid-row: 2;
+}
+.help-trigger {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 800;
+}
+.help-trigger:hover {
+  background: var(--surface-elevated);
+}
+.help-popover {
+  width: min(36rem, calc(100% - 2rem));
+  max-height: min(42rem, calc(100dvh - 2rem));
+  padding: 1.25rem;
+  overflow-y: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1rem 2.5rem rgb(28 27 27 / 18%);
+}
+.help-popover::backdrop {
+  background: rgb(27 25 24 / 42%);
+}
+.help-popover h3 {
+  margin-top: 0;
+}
+.help-popover dt {
+  margin-top: 0.8rem;
+  font-weight: 700;
+}
+.help-popover dd {
+  margin-left: 0;
+  color: var(--text-secondary);
 }
 .controls {
   display: grid;
@@ -415,22 +467,22 @@ legend {
   background: transparent;
   border: 2px solid #4f85a6;
 }
-.topology-annotations {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.75rem;
+.diagram-badge rect {
+  fill: var(--surface-elevated);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
-.topology-annotations span {
-  padding: 0.3rem 0.45rem;
-  border: 1px solid var(--border);
+.diagram-badge text {
+  fill: var(--text-primary);
   font:
-    0.68rem "JetBrains Mono",
+    600 10px "JetBrains Mono",
     monospace;
+  text-anchor: middle;
 }
-.topology-annotations [data-state="fault"],
-.topology-annotations [data-state="open"] {
-  border-color: var(--danger);
+.diagram-badge[data-state="fault"] rect,
+.diagram-badge[data-state="open"] rect {
+  stroke: var(--danger);
 }
 .flow-legend {
   margin-top: 1rem;
@@ -472,8 +524,11 @@ legend {
 }
 .activity ul {
   display: grid;
+  height: 12rem;
+  align-content: start;
   gap: 0.4rem;
   padding: 0;
+  overflow-y: auto;
   list-style: none;
 }
 .activity li {

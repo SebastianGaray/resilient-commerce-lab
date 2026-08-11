@@ -84,7 +84,7 @@ export const deriveTopology = (
     "queue-worker",
   ];
   const annotations: DerivedTopology["annotations"] = [];
-  if (config.controls.rateLimit < 120) {
+  if (config.controls.rateLimit < 1000) {
     nodes.splice(1, 0, "limiter");
     edges.splice(
       edges.indexOf("client-gateway"),
