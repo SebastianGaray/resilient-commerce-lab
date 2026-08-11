@@ -36,6 +36,16 @@ describe("deterministic simulation", () => {
     expect(result.metrics.completed).toBe(100);
   });
 
+  it("supports one thousand accepted requests per second", () => {
+    const config = defaultConfig();
+    config.requestsPerSecond = 1000;
+    config.controls.rateLimit = 1000;
+    const result = simulate(config);
+    expect(result.metrics.offered).toBe(10_000);
+    expect(result.metrics.completed).toBe(10_000);
+    expect(result.traces.length).toBeLessThanOrEqual(24);
+  });
+
   it("compares the same seed and traffic inputs", () => {
     const config = defaultConfig();
     config.pattern = "burst";

@@ -54,6 +54,20 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   page,
 }) => {
   await page.goto("en/");
+  await expect(page.locator('input[name="rate"]')).toHaveAttribute(
+    "max",
+    "1000",
+  );
+  await expect(page.locator('input[name="limit"]')).toHaveAttribute(
+    "max",
+    "1000",
+  );
+  await expect(page.locator("[data-annotations]")).toContainText(
+    "Circuit breaker: closed",
+  );
+  const activityHeight = await page
+    .locator(".activity ul")
+    .evaluate((element) => element.getBoundingClientRect().height);
   await page.getByRole("button", { name: "Play" }).click();
   await page.waitForTimeout(650);
   const progress = await page
@@ -61,6 +75,14 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     .getAttribute("value");
   expect(Number(progress)).toBeGreaterThan(0);
   expect(await page.locator("[data-orbs] > *").count()).toBeLessThanOrEqual(12);
+  expect(await page.locator("[data-activity] li").count()).toBeLessThanOrEqual(
+    5,
+  );
+  expect(
+    await page
+      .locator(".activity ul")
+      .evaluate((element) => element.getBoundingClientRect().height),
+  ).toBe(activityHeight);
   await page.getByRole("button", { name: "Pause" }).click();
   const pausedTime = await page.locator("[data-playback-time]").innerText();
   await page.waitForTimeout(250);
@@ -70,7 +92,7 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     "hidden",
     "",
   );
-  await page.locator('input[name="limit"]').fill("120");
+  await page.locator('input[name="limit"]').fill("1000");
   await page.locator('input[name="limit"]').press("Tab");
   await expect(page.locator('[data-node="limiter"]')).toHaveAttribute(
     "hidden",
@@ -78,4 +100,9 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   );
   await page.locator('select[name="mode"]').selectOption("continuous");
   await expect(page.locator("[data-loop-note]")).toBeVisible();
+  await page.getByRole("button", { name: "Open help" }).first().click();
+  await expect(page.locator("#controls-help")).toBeVisible();
+  await expect(page.locator("#controls-help")).toContainText(
+    "Requests per second",
+  );
 });

@@ -125,14 +125,41 @@ const faults = Object.entries(copy.faults);
           <div class="section-heading">
             <p class="eyebrow">01</p><h2 id="controls-title">
               {copy.controls}
-            </h2>
+            </h2><button
+              class="help-trigger"
+              type="button"
+              popovertarget="controls-help"
+              aria-label={copy.help.open}>?</button
+            >
           </div>
+          <aside id="controls-help" class="help-popover" popover>
+            <h3>{copy.help.controlsTitle}</h3><p>
+              {copy.help.controlsIntro}
+            </p><dl>
+              {
+                copy.help.controlsItems.map(([term, description]) => (
+                  <>
+                    <>
+                      <dt>{term}</dt>
+                      <dd>{description}</dd>
+                    </>
+                  </>
+                ))
+              }
+            </dl><button
+              type="button"
+              class="secondary"
+              popovertarget="controls-help"
+              popovertargetaction="hide">{copy.help.close}</button
+            >
+          </aside>
           <label
             >{copy.traffic}<output data-rate-output>24</output><input
               name="rate"
               type="range"
               min="4"
-              max="100"
+              max="1000"
+              step="4"
               value="24"
             /></label
           >
@@ -206,7 +233,7 @@ const faults = Object.entries(copy.faults);
                 name="limit"
                 type="number"
                 min="1"
-                max="120"
+                max="1000"
                 value="48"
               /></label
             >
@@ -253,8 +280,23 @@ const faults = Object.entries(copy.faults);
             <div class="section-heading">
               <p class="eyebrow">02</p><h2 id="architecture-title">
                 {copy.architecture}
-              </h2>
+              </h2><button
+                class="help-trigger"
+                type="button"
+                popovertarget="architecture-help"
+                aria-label={copy.help.open}>?</button
+              >
             </div>
+            <aside id="architecture-help" class="help-popover" popover>
+              <h3>{copy.help.architectureTitle}</h3><p>
+                {copy.help.architectureIntro}
+              </p><button
+                type="button"
+                class="secondary"
+                popovertarget="architecture-help"
+                popovertargetaction="hide">{copy.help.close}</button
+              >
+            </aside>
             <div class="playback-status">
               <span>{copy.playback.time}</span><strong data-playback-time
                 >0.0 s</strong
@@ -331,8 +373,8 @@ const faults = Object.entries(copy.faults);
                 ></g
               >
               <g class="orbs" data-orbs aria-hidden="true"></g>
+              <g class="diagram-badges" data-annotations aria-hidden="true"></g>
             </svg>
-            <div class="topology-annotations" data-annotations></div>
             <div class="flow-legend" aria-label={copy.playback.legend}>
               <strong>{copy.playback.legend}</strong><ul>
                 {

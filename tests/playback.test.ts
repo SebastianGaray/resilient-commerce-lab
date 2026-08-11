@@ -13,7 +13,7 @@ describe("derived topology", () => {
     expect(enabled.nodes).toContain("cache");
     expect(enabled.nodes).toContain("limiter");
     config.controls.cache = false;
-    config.controls.rateLimit = 120;
+    config.controls.rateLimit = 1000;
     const disabled = deriveTopology(config, "closed");
     expect(disabled.nodes).not.toContain("cache");
     expect(disabled.nodes).not.toContain("limiter");

@@ -8,4 +8,6 @@ Architecture nodes are bordered surfaces. Edges use labels, line style and state
 
 The topology is a projection of simulator state, not a second editor. Cache and limiter nodes appear only when their existing controls require them; faults and resilience mechanisms become annotations. Play runs one deterministic timeline, continuous mode loops that same seeded run, and Pause/Restart preserve a predictable playback contract. A persistent legend maps orb color and shape to requests, responses, waits, failures, retries, rate-limit rejections and cache outcomes.
 
+Mechanism annotations render as compact bubbles anchored to the node or connection where they act. The activity summary reserves a fixed-height five-event viewport to prevent playback from shifting the page. Circular help triggers beside the controls and architecture headings open native localized popovers that explain inputs and diagram semantics.
+
 Operational metrics use monospace values and plain-language labels. Traces use a vertical timing list on narrow screens. The customer preview remains subordinate to the simulator and always carries a simulated label. Panels reflow without horizontal page scroll at the supported 20rem minimum.

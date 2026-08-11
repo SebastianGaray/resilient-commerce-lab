@@ -51,3 +51,10 @@
 - [x] **T091** (`RCL-TOPO-001`) Derive visible topology and annotations from controls and faults.
 - [x] **T092** (`RCL-PLAY-001`, `RCL-FLOW-001`, `RCL-A11Y-001`) Add Play/Pause/Restart, speed, modes, orbs, legend and reduced-motion equivalent.
 - [x] **T093** (`RCL-I18N-001`, `RCL-PERF-001`) Validate locale parity, themes, desktop, 20rem and bounded rendering.
+
+## M11 — Scale, anchored mechanisms and guidance
+
+- [x] **T100** (`RCL-SCALE-001`, `RCL-PERF-001`) Support and test up to 1,000 requests per second without unbounded rendering.
+- [x] **T101** (`RCL-TOPO-001`) Render resilience and fault bubbles at their diagram anchors.
+- [x] **T102** (`RCL-FLOW-001`, `RCL-A11Y-001`) Stabilize the activity panel at five latest events.
+- [x] **T103** (`RCL-HELP-001`, `RCL-I18N-001`) Add localized contextual help for controls and diagram semantics.
