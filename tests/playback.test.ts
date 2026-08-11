@@ -3,6 +3,8 @@ import {
   createPlaybackTimeline,
   deriveTopology,
   metricsAt,
+  tracePaintAt,
+  type PlaybackTimeline,
 } from "../src/domain/playback";
 import { defaultConfig, simulate } from "../src/domain/simulation";
 
@@ -37,10 +39,44 @@ describe("playback timeline", () => {
     const first = createPlaybackTimeline(result);
     expect(first).toEqual(createPlaybackTimeline(result));
     expect(first.sampledRequests).toBeLessThanOrEqual(12);
+    expect(first.durationMs).toBe(10_000);
     expect(first.events.length).toBeGreaterThan(0);
     expect(first.events.some((event) => event.edge === "queue-worker")).toBe(
       true,
     );
+  });
+
+  it("keeps overlapping outcomes in separate bounded paint layers", () => {
+    const timeline: PlaybackTimeline = {
+      durationMs: 10_000,
+      sampledRequests: 2,
+      events: [
+        {
+          id: "success",
+          requestId: "one",
+          atMs: 100,
+          durationMs: 300,
+          edge: "order-payment",
+          reverse: true,
+          kind: "success",
+          label: "success",
+        },
+        {
+          id: "error",
+          requestId: "two",
+          atMs: 150,
+          durationMs: 300,
+          edge: "order-payment",
+          reverse: true,
+          kind: "error",
+          label: "error",
+        },
+      ],
+    };
+    const paint = tracePaintAt(timeline, 200);
+    expect(paint.map((item) => item.kind)).toEqual(["error", "success"]);
+    expect(paint.every((item) => item.intensity > 0)).toBe(true);
+    expect(tracePaintAt(timeline, 2300)).toEqual([]);
   });
 
   it("shows representative rejections at the limiter", () => {

@@ -26,13 +26,20 @@ const en = {
     play: "Play",
     pause: "Pause",
     restart: "Restart",
-    speed: "Playback speed",
     mode: "Playback mode",
     single: "Single run",
     continuous: "Continuous",
     loopNote: "Continuous repeats the same seeded run.",
     time: "Virtual playback time",
     legend: "Flow legend",
+    paintEmpty: "Recent connection outcomes will appear here during playback.",
+    paintRecent: "Recent connection paint",
+  },
+  rateLimits: {
+    none: "No limit — 1,000 req/s",
+    low: "Low — 50 req/s",
+    medium: "Medium — 250 req/s",
+    high: "High — 500 req/s",
   },
   flowLegend: {
     request: "Request",
@@ -84,7 +91,7 @@ const en = {
       ],
       [
         "Rate limit",
-        "Rejects arrivals above this per-second capacity before downstream work.",
+        "Selects no limit (1,000/s), low (50/s), medium (250/s) or high (500/s) capacity before downstream work.",
       ],
       [
         "Idempotency",
@@ -97,7 +104,7 @@ const en = {
     ],
     architectureTitle: "How to read the diagram",
     architectureIntro:
-      "Nodes and connections come from the controls. Bubbles sit where each mechanism or fault acts; moving shapes are a bounded sample, not one shape per request.",
+      "Nodes and connections come from the controls. Bubbles sit where each mechanism or fault acts; moving shapes are a bounded sample. Offset green, red, amber and gray paint shows weighted outcomes from the latest two virtual seconds and fades over time.",
   },
   patterns: {
     constant: "Constant",
@@ -219,13 +226,21 @@ const es = {
     play: "Reproducir",
     pause: "Pausar",
     restart: "Reiniciar",
-    speed: "Velocidad de reproducción",
     mode: "Modo de reproducción",
     single: "Una ejecución",
     continuous: "Continuo",
     loopNote: "El modo continuo repite la misma ejecución y semilla.",
     time: "Tiempo virtual de reproducción",
     legend: "Leyenda del flujo",
+    paintEmpty:
+      "Los resultados recientes por conexión aparecerán aquí durante la reproducción.",
+    paintRecent: "Pintura reciente por conexión",
+  },
+  rateLimits: {
+    none: "Sin límite — 1.000 sol/s",
+    low: "Bajo — 50 sol/s",
+    medium: "Medio — 250 sol/s",
+    high: "Alto — 500 sol/s",
   },
   flowLegend: {
     request: "Solicitud",
@@ -283,7 +298,7 @@ const es = {
       ],
       [
         "Límite de tasa",
-        "Rechaza llegadas sobre esta capacidad antes del trabajo downstream.",
+        "Selecciona sin límite (1.000/s), capacidad baja (50/s), media (250/s) o alta (500/s) antes del trabajo downstream.",
       ],
       [
         "Idempotencia",
@@ -296,7 +311,7 @@ const es = {
     ],
     architectureTitle: "Cómo leer el diagrama",
     architectureIntro:
-      "Los nodos y conexiones provienen de los controles. Las burbujas se ubican donde actúa cada mecanismo o fallo; las figuras móviles son una muestra acotada, no una por solicitud.",
+      "Los nodos y conexiones provienen de los controles. Las burbujas se ubican donde actúa cada mecanismo o fallo; las figuras móviles son una muestra acotada. La pintura verde, roja, ámbar y gris desplazada muestra resultados ponderados de los últimos dos segundos virtuales y se desvanece con el tiempo.",
   },
   patterns: {
     constant: "Constante",

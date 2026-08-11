@@ -24,7 +24,7 @@ The persistent label is **Simulation · Not production telemetry** / **Simulaci�
 - **RCL-A11Y-001** The experience is semantic, keyboard usable, non-color-dependent, reduced-motion compatible and understandable without animation.
 - **RCL-I18N-001** `/en/` and `/es/` have equivalent routes, controls, content, metadata and preserved destinations; `/` redirects to English.
 - **RCL-PERF-001** Logical request volume never creates one DOM node per request; rendering is sampled and bounded.
-- **RCL-PLAY-001** Play starts or resumes a deterministic visual replay; Pause freezes it; Restart returns to virtual time zero; 0.5×/1×/2× affect presentation time only. Single mode stops after one run and Continuous repeats the same seeded run with a visible explanation.
+- **RCL-PLAY-001** Play starts or resumes a deterministic ten-second visual replay; Pause freezes it; Restart returns to virtual time zero. Virtual time always advances at 1× while orb travel uses a fixed 0.5× presentation speed. Single mode stops after one run and Continuous repeats the same seeded run with a visible explanation.
 - **RCL-TOPO-001** The diagram derives visible nodes, edges and mechanism annotations from existing controls and active fault state. It is not an arbitrary topology editor.
 - **RCL-FLOW-001** At most 12 simultaneous representative orbs communicate normal requests, successes, waiting/degradation, errors/timeouts, retries, limiting, cache hits and cache misses through color plus shape/border and a textual equivalent.
 - **RCL-SCALE-001** Traffic and rate-limit controls accept up to 1,000 requests per second while the simulation and DOM remain bounded.
@@ -38,3 +38,5 @@ Requirements are complete only when implementation, focused tests, browser evide
 Playback must never change logical results. At completion, displayed metrics equal the full deterministic run. Reduced-motion mode replaces moving orbs with active-edge and event-state updates.
 
 Mechanisms and faults must appear as bubbles anchored over their relevant diagram node or edge. The accessible activity summary keeps a fixed visual height and shows no more than the latest five events so playback never shifts the page vertically.
+
+Rate limiting uses explicit presets: No limit — 1,000/s, Low — 50/s, Medium — 250/s and High — 500/s. Each edge retains at most four recent outcome layers for a two-second virtual window. Success, error, wait and limited layers use separate offset colors whose opacity and width represent weighted recent frequency; they decay without overwriting one another.

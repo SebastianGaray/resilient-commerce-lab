@@ -58,10 +58,9 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     "max",
     "1000",
   );
-  await expect(page.locator('input[name="limit"]')).toHaveAttribute(
-    "max",
-    "1000",
-  );
+  await expect(page.locator('select[name="limit"] option')).toHaveCount(4);
+  await expect(page.locator('select[name="speed"]')).toHaveCount(0);
+  await expect(page.locator('select[name="limit"]')).toHaveValue("250");
   await expect(page.locator("[data-annotations]")).toContainText(
     "Circuit breaker: closed",
   );
@@ -75,6 +74,12 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     .getAttribute("value");
   expect(Number(progress)).toBeGreaterThan(0);
   expect(await page.locator("[data-orbs] > *").count()).toBeLessThanOrEqual(12);
+  expect(
+    await page.locator("[data-trace-paint] > *").count(),
+  ).toBeLessThanOrEqual(36);
+  await expect(page.locator("[data-paint-summary]")).toContainText(
+    "Recent paint",
+  );
   expect(await page.locator("[data-activity] li").count()).toBeLessThanOrEqual(
     5,
   );
@@ -92,8 +97,7 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
     "hidden",
     "",
   );
-  await page.locator('input[name="limit"]').fill("1000");
-  await page.locator('input[name="limit"]').press("Tab");
+  await page.locator('select[name="limit"]').selectOption("1000");
   await expect(page.locator('[data-node="limiter"]')).toHaveAttribute(
     "hidden",
     "",

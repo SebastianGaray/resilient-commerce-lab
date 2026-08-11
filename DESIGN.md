@@ -10,4 +10,6 @@ The topology is a projection of simulator state, not a second editor. Cache and 
 
 Mechanism annotations render as compact bubbles anchored to the node or connection where they act. The activity summary reserves a fixed-height five-event viewport to prevent playback from shifting the page. Circular help triggers beside the controls and architecture headings open native localized popovers that explain inputs and diagram semantics.
 
+Rate limiting is selected through named presets with their exact capacity in the label. Playback always spans ten virtual seconds at real-time clock speed; orbs travel at a fixed half speed without exposing another control. Recent outcomes paint each edge as separately offset dotted green, red, amber and gray layers. Stroke intensity and width represent weighted activity in the last two virtual seconds and fade instead of overwriting other outcomes.
+
 Operational metrics use monospace values and plain-language labels. Traces use a vertical timing list on narrow screens. The customer preview remains subordinate to the simulator and always carries a simulated label. Panels reflow without horizontal page scroll at the supported 20rem minimum.

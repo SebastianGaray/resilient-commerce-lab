@@ -58,3 +58,10 @@
 - [x] **T101** (`RCL-TOPO-001`) Render resilience and fault bubbles at their diagram anchors.
 - [x] **T102** (`RCL-FLOW-001`, `RCL-A11Y-001`) Stabilize the activity panel at five latest events.
 - [x] **T103** (`RCL-HELP-001`, `RCL-I18N-001`) Add localized contextual help for controls and diagram semantics.
+
+## M12 — Categorical limits and recent-flow paint
+
+- [x] **T110** (`RCL-SCALE-001`, `RCL-I18N-001`) Replace the numeric rate limit with localized named presets and explicit values.
+- [x] **T111** (`RCL-PLAY-001`) Fix playback to ten virtual seconds at 1× with half-speed orb travel and no speed selector.
+- [x] **T112** (`RCL-FLOW-001`, `RCL-PERF-001`, `RCL-A11Y-001`) Add bounded, decaying, non-overwriting outcome paint and a textual equivalent.
+- [x] **T113** (`RCL-I18N-001`, `RCL-PERF-001`) Validate locale parity, reduced motion, responsive rendering and bounded DOM output.
