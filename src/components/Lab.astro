@@ -10,8 +10,8 @@ const { copy } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const canonical = new URL(`${base}${copy.lang}/`, Astro.site);
 const alternate = new URL(`${base}${copy.alternate}/`, Astro.site);
-const patterns = Object.entries(copy.patterns);
-const faults = Object.entries(copy.faults);
+const scenarios = Object.entries(copy.scenarios);
+const scalingOptions = Object.entries(copy.scalingOptions);
 ---
 
 <!doctype html>
@@ -146,7 +146,28 @@ const faults = Object.entries(copy.faults);
                   </>
                 ))
               }
-            </dl><button
+            </dl><strong>{copy.help.formulaTitle}</strong><dl>
+              {
+                copy.help.formulaItems.map(([term, description]) => (
+                  <>
+                    <dt>{term}</dt>
+                    <dd>{description}</dd>
+                  </>
+                ))
+              }
+            </dl><strong>{copy.help.sourcesTitle}</strong><ul
+              class="help-sources"
+            >
+              {
+                copy.help.sources.map(([label, href]) => (
+                  <li>
+                    <a href={href} target="_blank" rel="noreferrer">
+                      {label} ↗
+                    </a>
+                  </li>
+                ))
+              }
+            </ul><button
               type="button"
               class="secondary"
               popovertarget="controls-help"
@@ -154,19 +175,20 @@ const faults = Object.entries(copy.faults);
             >
           </aside>
           <label
-            >{copy.traffic}<output data-rate-output>24</output><input
-              name="rate"
-              type="range"
-              min="4"
-              max="1000"
-              step="4"
-              value="24"
-            /></label
+            >{copy.traffic}<select name="scenario"
+              >{
+                scenarios.map(([value, label]) => (
+                  <option value={value} selected={value === "normal"}>
+                    {label}
+                  </option>
+                ))
+              }</select
+            ></label
           >
           <label
-            >{copy.pattern}<select name="pattern"
+            >{copy.scaling}<select name="scaling"
               >{
-                patterns.map(([value, label]) => (
+                scalingOptions.map(([value, label]) => (
                   <option value={value}>{label}</option>
                 ))
               }</select
@@ -181,29 +203,19 @@ const faults = Object.entries(copy.faults);
               value="42"
             /></label
           >
-          <label
-            >{copy.fault}<select name="fault"
-              >{
-                faults.map(([value, label]) => (
-                  <option value={value}>{label}</option>
-                ))
-              }</select
-            ></label
-          >
-          <label
-            >{copy.intensity}<output data-intensity-output>0%</output><input
-              name="intensity"
-              type="range"
-              min="0"
-              max="100"
-              value="0"
-            /></label
-          >
           <fieldset>
-            <legend>{copy.resilience}</legend>
-            <label class="check"
-              ><input name="cache" type="checkbox" checked />{copy.cache}</label
+            <legend>{copy.groups.entry}</legend>
+            <label
+              >{copy.limit}<select name="limit"
+                ><option value="1000">{copy.rateLimits.none}</option><option
+                  value="50">{copy.rateLimits.low}</option
+                ><option value="250" selected>{copy.rateLimits.medium}</option
+                ><option value="500">{copy.rateLimits.high}</option></select
+              ></label
             >
+          </fieldset>
+          <fieldset>
+            <legend>{copy.groups.dependencies}</legend>
             <label
               >{copy.timeout}<select name="timeout"
                 ><option value="300">300 ms</option><option value="650" selected
@@ -228,14 +240,15 @@ const faults = Object.entries(copy.faults);
                 copy.circuit
               }</label
             >
-            <label
-              >{copy.limit}<select name="limit"
-                ><option value="1000">{copy.rateLimits.none}</option><option
-                  value="50">{copy.rateLimits.low}</option
-                ><option value="250" selected>{copy.rateLimits.medium}</option
-                ><option value="500">{copy.rateLimits.high}</option></select
-              ></label
+          </fieldset>
+          <fieldset>
+            <legend>{copy.groups.data}</legend>
+            <label class="check"
+              ><input name="cache" type="checkbox" checked />{copy.cache}</label
             >
+          </fieldset>
+          <fieldset>
+            <legend>{copy.groups.async}</legend>
             <label class="check"
               ><input name="idempotency" type="checkbox" checked />{
                 copy.idempotency
@@ -368,14 +381,13 @@ const faults = Object.entries(copy.faults);
               <g class="orbs" data-orbs aria-hidden="true"></g>
               <g class="diagram-badges" data-annotations aria-hidden="true"></g>
             </svg>
-            <p
-              class="paint-summary"
-              data-paint-summary
-              aria-live="polite"
-              tabindex="0"
-            >
-              {copy.playback.paintEmpty}
-            </p>
+            <div class="resource-summary">
+              <strong>{copy.resources.title}</strong><div
+                data-resources
+                aria-live="polite"
+              >
+              </div>
+            </div>
             <div class="flow-legend" aria-label={copy.playback.legend}>
               <strong>{copy.playback.legend}</strong><ul>
                 {

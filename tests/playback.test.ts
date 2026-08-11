@@ -22,14 +22,11 @@ describe("derived topology", () => {
     expect(disabled.edges).toContain("client-gateway");
   });
 
-  it("annotates configured faults without editing arbitrary topology", () => {
+  it("anchors dependency mechanisms to the order service", () => {
     const config = defaultConfig();
-    config.fault = { target: "worker", intensity: 80 };
-    expect(deriveTopology(config, "closed").annotations).toContainEqual({
-      target: "worker",
-      label: "80% fault",
-      state: "fault",
-    });
+    expect(deriveTopology(config, "closed").annotations).toContainEqual(
+      expect.objectContaining({ target: "order", label: "1 retry" }),
+    );
   });
 });
 
@@ -81,8 +78,8 @@ describe("playback timeline", () => {
 
   it("shows representative rejections at the limiter", () => {
     const config = defaultConfig();
-    config.requestsPerSecond = 120;
-    config.controls.rateLimit = 20;
+    config.scenario = "cyber";
+    config.controls.rateLimit = 50;
     const timeline = createPlaybackTimeline(simulate(config));
     expect(
       timeline.events.some(

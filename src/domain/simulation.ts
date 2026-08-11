@@ -1,16 +1,25 @@
-export type TrafficPattern = "constant" | "ramp" | "burst" | "flash";
+import {
+  capacityAt,
+  scenarioArrivals,
+  type ResourceSnapshot,
+  type ScalingStrategy,
+  type ServiceId,
+  type TrafficScenario,
+} from "./capacity";
+
+export type {
+  ResourceSnapshot,
+  ScalingStrategy,
+  TrafficScenario,
+} from "./capacity";
 export type CircuitState = "closed" | "open" | "half-open";
 export type Outcome = "success" | "error" | "timeout" | "limited";
 
 export interface SimulationConfig {
   seed: number;
   durationMs: number;
-  requestsPerSecond: number;
-  pattern: TrafficPattern;
-  fault: {
-    target: "none" | "inventory" | "payment" | "cache" | "worker";
-    intensity: number;
-  };
+  scenario: TrafficScenario;
+  scaling: ScalingStrategy;
   controls: {
     cache: boolean;
     timeoutMs: number;
@@ -65,14 +74,14 @@ export interface SimulationResult {
     count: number;
     state: "normal" | "degraded" | "blocked";
   }>;
+  resources: ResourceSnapshot[];
 }
 
 const DEFAULT_CONFIG: SimulationConfig = {
   seed: 42,
   durationMs: 10_000,
-  requestsPerSecond: 24,
-  pattern: "constant",
-  fault: { target: "none", intensity: 0 },
+  scenario: "normal",
+  scaling: "none",
   controls: {
     cache: true,
     timeoutMs: 650,
@@ -110,18 +119,6 @@ const percentile = (values: number[], fraction: number): number => {
   );
 };
 
-const trafficMultiplier = (
-  pattern: TrafficPattern,
-  progress: number,
-): number => {
-  if (pattern === "ramp") return 0.5 + progress;
-  if (pattern === "burst")
-    return progress > 0.42 && progress < 0.62 ? 2.6 : 0.65;
-  if (pattern === "flash")
-    return progress < 0.18 ? 0.45 : progress < 0.72 ? 2.1 : 0.9;
-  return 1;
-};
-
 const requestKind = (random: Random): RequestTrace["kind"] => {
   const value = random.next();
   return value < 0.58 ? "browse" : value < 0.78 ? "cart" : "order";
@@ -146,15 +143,35 @@ export function simulate(input: SimulationConfig): SimulationResult {
   let consecutiveFailures = 0;
   let circuitState: CircuitState = "closed";
   let circuitOpenedAt = -1;
+  const resourcePeaks = new Map<ServiceId, ResourceSnapshot>();
 
   for (let second = 0; second < seconds; second += 1) {
-    const progress = seconds === 1 ? 0 : second / (seconds - 1);
-    const arrivals = Math.round(
-      config.requestsPerSecond * trafficMultiplier(config.pattern, progress),
-    );
+    const arrivals = scenarioArrivals(config.scenario, second, seconds);
     offered += arrivals;
     const accepted = Math.min(arrivals, Math.max(0, config.controls.rateLimit));
     limited += arrivals - accepted;
+    const capacity = capacityAt(
+      config.scenario,
+      config.scaling,
+      accepted,
+      config.controls.cache,
+      queueDepth,
+    );
+    capacity.resources.forEach((snapshot) => {
+      const peak = resourcePeaks.get(snapshot.service);
+      resourcePeaks.set(snapshot.service, {
+        ...snapshot,
+        cpu: Math.max(snapshot.cpu, peak?.cpu ?? 0),
+        memory: Math.max(snapshot.memory, peak?.memory ?? 0),
+        instances: Math.max(snapshot.instances, peak?.instances ?? 0),
+        state:
+          snapshot.cpu >= 95 || peak?.state === "saturated"
+            ? "saturated"
+            : snapshot.cpu >= 70 || peak?.state === "busy"
+              ? "busy"
+              : "healthy",
+      });
+    });
 
     for (let index = 0; index < accepted; index += 1) {
       const id = `req-${second.toString(36)}-${index.toString(36)}`;
@@ -175,11 +192,13 @@ export function simulate(input: SimulationConfig): SimulationResult {
         circuitState = "half-open";
       const dependency =
         kind === "order" ? "Payment Service" : "Inventory Service";
-      const target = kind === "order" ? "payment" : "inventory";
+      const target: ServiceId = kind === "order" ? "payment" : "inventory";
       let cacheHit = false;
       if (kind === "browse" && config.controls.cache) {
         cacheLookups += 1;
-        cacheHit = config.fault.target !== "cache" && random.next() < 0.68;
+        cacheHit =
+          random.next() < 0.68 &&
+          random.next() >= capacity.pressure.cache.errorProbability;
         if (cacheHit) cacheHits += 1;
         spans.push({
           service: "Cache",
@@ -208,15 +227,23 @@ export function simulate(input: SimulationConfig): SimulationResult {
         } else {
           while (attempt <= config.controls.retries) {
             dependencyRequests += 1;
-            const faultActive = config.fault.target === target;
-            const intensity = faultActive
-              ? Math.min(100, Math.max(0, config.fault.intensity)) / 100
-              : 0;
-            const latency = Math.round(
-              45 + random.next() * 85 + intensity * 850,
+            const dependencyPressure = capacity.pressure[target];
+            const platformError = Math.max(
+              capacity.pressure.gateway.errorProbability,
+              capacity.pressure.order.errorProbability,
             );
-            const dependencyFails =
-              faultActive && random.next() < intensity * 0.72;
+            const overloadError = Math.min(
+              0.95,
+              platformError + dependencyPressure.errorProbability,
+            );
+            const latency = Math.round(
+              45 +
+                random.next() * 85 +
+                capacity.pressure.gateway.latencyPenaltyMs +
+                capacity.pressure.order.latencyPenaltyMs +
+                dependencyPressure.latencyPenaltyMs,
+            );
+            const dependencyFails = random.next() < overloadError;
             const timedOut = latency > config.controls.timeoutMs;
             outcome = timedOut
               ? "timeout"
@@ -287,9 +314,8 @@ export function simulate(input: SimulationConfig): SimulationResult {
     }
 
     const workerCapacity =
-      config.fault.target === "worker"
-        ? Math.max(1, Math.round(7 * (1 - config.fault.intensity / 120)))
-        : 7;
+      capacity.resources.find((item) => item.service === "worker")
+        ?.capacityPerSecond ?? 7;
     queueDepth = Math.max(0, queueDepth - workerCapacity);
   }
 
@@ -321,6 +347,7 @@ export function simulate(input: SimulationConfig): SimulationResult {
     config,
     metrics,
     traces,
+    resources: [...resourcePeaks.values()],
     activity: [
       {
         edge: "client-gateway",
@@ -358,7 +385,7 @@ export function compare(config: SimulationConfig): {
   const baseline = defaultConfig();
   baseline.seed = config.seed;
   baseline.durationMs = config.durationMs;
-  baseline.requestsPerSecond = config.requestsPerSecond;
-  baseline.pattern = config.pattern;
+  baseline.scenario = config.scenario;
+  baseline.scaling = config.scaling;
   return { baseline: simulate(baseline), current: simulate(config) };
 }

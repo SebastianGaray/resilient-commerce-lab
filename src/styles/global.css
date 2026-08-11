@@ -283,6 +283,12 @@ main > section {
   margin-left: 0;
   color: var(--text-secondary);
 }
+.help-sources {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.6rem 0 1rem;
+  padding-left: 1.1rem;
+}
 .controls {
   display: grid;
   align-content: start;
@@ -431,16 +437,32 @@ legend {
 .trace-limited {
   stroke: var(--text-muted);
 }
-.paint-summary {
-  height: 4.5rem;
-  margin: 0.5rem 0 0;
-  padding: 0.5rem 0.65rem;
-  overflow-y: auto;
-  border-left: 3px solid var(--border-strong);
+.resource-summary {
+  margin-top: 0.75rem;
+}
+.resource-summary > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.resource-summary article {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.5rem;
+  border-left: 3px solid var(--success);
+  background: var(--background-secondary);
+  font-size: 0.72rem;
+}
+.resource-summary article[data-state="busy"] {
+  border-color: var(--warning);
+}
+.resource-summary article[data-state="saturated"] {
+  border-color: var(--danger);
+}
+.resource-summary span,
+.resource-summary small {
   color: var(--text-secondary);
-  font:
-    0.68rem/1.45 "JetBrains Mono",
-    monospace;
 }
 .nodes rect {
   fill: var(--surface);
@@ -518,7 +540,6 @@ legend {
     monospace;
   text-anchor: middle;
 }
-.diagram-badge[data-state="fault"] rect,
 .diagram-badge[data-state="open"] rect {
   stroke: var(--danger);
 }
@@ -705,6 +726,9 @@ legend {
   }
   .nodes text {
     font-size: 16px;
+  }
+  .resource-summary > div {
+    grid-template-columns: 1fr;
   }
 }
 @media (min-width: 48rem) {

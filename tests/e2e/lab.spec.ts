@@ -14,14 +14,15 @@ for (const locale of ["en", "es"] as const) {
       ),
     ).toBeVisible();
     await expect(page.locator("[data-metrics] article")).toHaveCount(10);
-    await page.locator('select[name="fault"]').selectOption("inventory");
-    await page.locator('input[name="intensity"]').fill("90");
+    await page.locator('select[name="scenario"]').selectOption("cyber");
+    await page.locator('select[name="scaling"]').selectOption("horizontal");
     await page
       .getByRole("button", {
         name: locale === "en" ? "Play" : "Reproducir",
       })
       .click();
     await expect(page.locator("[data-traces] details").first()).toBeVisible();
+    await expect(page.locator("[data-resources] article")).toHaveCount(6);
     await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute(
       "href",
       /\/en\/$/,
@@ -54,10 +55,9 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   page,
 }) => {
   await page.goto("en/");
-  await expect(page.locator('input[name="rate"]')).toHaveAttribute(
-    "max",
-    "1000",
-  );
+  await expect(page.locator('select[name="scenario"] option')).toHaveCount(4);
+  await expect(page.locator('select[name="scaling"] option')).toHaveCount(3);
+  await expect(page.locator('select[name="fault"]')).toHaveCount(0);
   await expect(page.locator('select[name="limit"] option')).toHaveCount(4);
   await expect(page.locator('select[name="speed"]')).toHaveCount(0);
   await expect(page.locator('select[name="limit"]')).toHaveValue("250");
@@ -77,9 +77,8 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   expect(
     await page.locator("[data-trace-paint] > *").count(),
   ).toBeLessThanOrEqual(36);
-  await expect(page.locator("[data-paint-summary]")).toContainText(
-    "Recent paint",
-  );
+  await expect(page.locator("[data-paint-summary]")).toHaveCount(0);
+  await expect(page.locator("[data-resources]")).toContainText("CPU");
   expect(await page.locator("[data-activity] li").count()).toBeLessThanOrEqual(
     5,
   );
@@ -107,6 +106,10 @@ test("playback animates bounded orbs, pauses and derives topology", async ({
   await page.getByRole("button", { name: "Open help" }).first().click();
   await expect(page.locator("#controls-help")).toBeVisible();
   await expect(page.locator("#controls-help")).toContainText(
-    "Requests per second",
+    "Traffic scenario",
+  );
+  await expect(page.locator("#controls-help a").first()).toHaveAttribute(
+    "href",
+    /kubernetes\.io/,
   );
 });

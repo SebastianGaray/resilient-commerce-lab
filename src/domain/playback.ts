@@ -41,7 +41,7 @@ export interface DerivedTopology {
   annotations: Array<{
     target: NodeId | EdgeId;
     label: string;
-    state: "enabled" | "fault" | "open";
+    state: "enabled" | "open";
   }>;
 }
 
@@ -113,16 +113,13 @@ export const deriveTopology = (
   }
   if (config.controls.retries > 0)
     annotations.push({
-      target:
-        config.fault.target === "inventory"
-          ? "order-inventory"
-          : "order-payment",
+      target: "order",
       label: `${config.controls.retries} retry`,
       state: "enabled",
     });
   if (config.controls.circuitBreaker)
     annotations.push({
-      target: "order-payment",
+      target: "order",
       label: circuitState,
       state: circuitState === "open" ? "open" : "enabled",
     });
@@ -132,15 +129,6 @@ export const deriveTopology = (
       label: "idempotent",
       state: "enabled",
     });
-  if (config.fault.target !== "none") {
-    const target: NodeId =
-      config.fault.target === "worker" ? "worker" : config.fault.target;
-    annotations.push({
-      target,
-      label: `${config.fault.intensity}% fault`,
-      state: "fault",
-    });
-  }
   return { nodes, edges, annotations };
 };
 
