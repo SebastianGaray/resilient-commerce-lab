@@ -10,7 +10,7 @@ The public topology is Client → API Gateway → Order Service → Inventory an
 
 ## Model
 
-Events use `(time, sequence)` ordering. A documented seeded generator controls latency, errors and jitter. Traffic is bounded per run. Queue capacity and worker service rate create backpressure. Timeouts race dependencies; retries are bounded and scheduled with exponential backoff plus seeded jitter. Circuit state transitions are explicit. Token-bucket limiting and idempotency records are deterministic.
+Events use `(time, sequence)` ordering. A documented seeded generator controls latency, errors and jitter. Traffic is bounded per run. Queue capacity and worker service rate create backpressure. Trace capture reserves successful orders so playback visibly represents Queue and Worker without changing their real traffic share. Timeouts race dependencies; retries are bounded and scheduled with exponential backoff plus seeded jitter. Circuit state transitions are explicit. Token-bucket limiting and idempotency records are deterministic.
 
 `capacity.ts` owns scenario arrival curves, request-cost weights, per-service capacities, CPU/memory estimates and scaling. Horizontal desired replicas use `ceil(demand / (perInstanceCapacity × 0.70))` capped by the user's 2, 4 or 8 instance selection. Vertical scaling keeps one instance and doubles capacity. Error probability grows only above 85% modeled utilization, while a quadratic latency penalty begins above 70%; these are transparent educational heuristics, not capacity recommendations. The UI reports capacity units, not currency.
 
@@ -18,7 +18,7 @@ Metrics aggregate completed events and latency histograms. Traces retain a bound
 
 The SVG renderer caps concurrent orbs at 12 and uses edge paths for motion. Event kind is encoded by color plus class-specific outline/shape and repeated in an accessible activity log. Reduced motion disables path travel while preserving edge, node and textual state changes.
 
-The simulator accepts up to 1,000 arrivals and accepted requests per second, but retains only bounded trace and playback samples. Playback event offsets and half-speed travel durations are normalized into the complete ten-second window. SVG mechanism badges use predefined anchor coordinates for each node or edge. Native popovers provide localized section-level glossaries, the compact legend uses native details/summary, and the activity region reserves five rows while rendering only the latest five events.
+The simulator accepts up to 1,000 arrivals and accepted requests per second, but retains only bounded trace and playback samples. Defaults disable optional resilience controls and use a 5,000 ms lab ceiling as the no-timeout-guard state. Playback event offsets and half-speed travel durations are normalized into the complete ten-second window. SVG mechanism badges use predefined anchor coordinates for each node or edge; the circuit breaker targets the dependency path. Native popovers provide localized section-level glossaries, the compact legend uses native details/summary, and the activity region reserves five rows while rendering only the latest five events. Customer output is gated by non-zero virtual playback evidence.
 
 Recent flow paint is derived from timeline events in a sliding two-second virtual window. It aggregates weighted counts into four outcome categories per edge and renders no more than 36 SVG paths. Offset dotted strokes keep mixed outcomes distinct; intensity and width decay as events leave the window.
 

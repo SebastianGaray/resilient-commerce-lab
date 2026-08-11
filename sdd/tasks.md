@@ -81,3 +81,11 @@
 - [x] **T132** (`RCL-CX-001`) Add localized, configuration-aware next-step guidance to the customer preview.
 - [x] **T133** (`RCL-CAP-001`) Expose horizontal replica caps and a relative capacity footprint.
 - [x] **T134** (`RCL-I18N-001`, `RCL-PERF-001`) Validate timing, guidance, accessibility and responsive rendering.
+
+## M15 — Progressive resilience guidance
+
+- [x] **T140** (`RCL-RES-001`) Start with optional resilience mechanisms disabled and a documented unprotected timeout ceiling.
+- [x] **T141** (`RCL-FLOW-001`) Reserve representative successful orders so Queue and Worker remain visible in playback.
+- [x] **T142** (`RCL-CX-001`) Gate customer preview and next-step guidance on progressive playback evidence.
+- [x] **T143** (`RCL-TOPO-001`) Anchor circuit breaker on dependency calls and place the legend directly below the diagram.
+- [x] **T144** (`RCL-I18N-001`, `RCL-PERF-001`) Validate defaults, queue visibility, progressive guidance, annotation placement and responsive rendering.

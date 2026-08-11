@@ -213,9 +213,9 @@ const scalingOptions = Object.entries(copy.scalingOptions);
             <legend>{copy.groups.entry}</legend>
             <label
               >{copy.limit}<select name="limit"
-                ><option value="1000">{copy.rateLimits.none}</option><option
-                  value="50">{copy.rateLimits.low}</option
-                ><option value="250" selected>{copy.rateLimits.medium}</option
+                ><option value="1000" selected>{copy.rateLimits.none}</option
+                ><option value="50">{copy.rateLimits.low}</option><option
+                  value="250">{copy.rateLimits.medium}</option
                 ><option value="500">{copy.rateLimits.high}</option></select
               ></label
             >
@@ -224,39 +224,38 @@ const scalingOptions = Object.entries(copy.scalingOptions);
             <legend>{copy.groups.dependencies}</legend>
             <label
               >{copy.timeout}<select name="timeout"
-                ><option value="300">300 ms</option><option value="650" selected
+                ><option value="300">300 ms</option><option value="650"
                   >650 ms</option
-                ><option value="1200">1200 ms</option></select
+                ><option value="1200">1200 ms</option><option
+                  value="5000"
+                  selected>{copy.noTimeout}</option
+                ></select
               ></label
             >
             <label
               >{copy.retries}<select name="retries"
-                ><option value="0">0</option><option value="1" selected
+                ><option value="0" selected>0</option><option value="1"
                   >1</option
                 ><option value="2">2</option></select
               ></label
             >
             <label class="check"
-              ><input name="jitter" type="checkbox" checked />{
-                copy.jitter
-              }</label
+              ><input name="jitter" type="checkbox" />{copy.jitter}</label
             >
             <label class="check"
-              ><input name="circuit" type="checkbox" checked />{
-                copy.circuit
-              }</label
+              ><input name="circuit" type="checkbox" />{copy.circuit}</label
             >
           </fieldset>
           <fieldset>
             <legend>{copy.groups.data}</legend>
             <label class="check"
-              ><input name="cache" type="checkbox" checked />{copy.cache}</label
+              ><input name="cache" type="checkbox" />{copy.cache}</label
             >
           </fieldset>
           <fieldset>
             <legend>{copy.groups.async}</legend>
             <label class="check"
-              ><input name="idempotency" type="checkbox" checked />{
+              ><input name="idempotency" type="checkbox" />{
                 copy.idempotency
               }</label
             >
@@ -386,13 +385,6 @@ const scalingOptions = Object.entries(copy.scalingOptions);
               <g class="orbs" data-orbs aria-hidden="true"></g>
               <g class="diagram-badges" data-annotations aria-hidden="true"></g>
             </svg>
-            <div class="resource-summary">
-              <strong>{copy.resources.title}</strong><p
-                class="capacity-cost"
-                data-capacity-cost
-              >
-              </p><div data-resources aria-live="polite"></div>
-            </div>
             <details class="flow-legend">
               <summary>{copy.playback.legend}</summary><ul>
                 {
@@ -405,6 +397,13 @@ const scalingOptions = Object.entries(copy.scalingOptions);
                 }
               </ul>
             </details>
+            <div class="resource-summary">
+              <strong>{copy.resources.title}</strong><p
+                class="capacity-cost"
+                data-capacity-cost
+              >
+              </p><div data-resources aria-live="polite"></div>
+            </div>
             <div class="activity" aria-live="polite">
               <strong>{copy.activity}</strong><ul data-activity></ul>
             </div>

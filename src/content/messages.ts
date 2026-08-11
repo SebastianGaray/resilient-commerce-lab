@@ -19,6 +19,7 @@ const en = {
   traffic: "Traffic scenario",
   scaling: "Capacity scaling",
   maxInstances: "Maximum horizontal instances",
+  noTimeout: "No timeout guard — 5,000 ms",
   seed: "Seed",
   run: "Run simulation",
   playback: {
@@ -48,7 +49,7 @@ const en = {
     close: "Close",
     controlsTitle: "About the controls",
     controlsIntro:
-      "These inputs configure one deterministic simulation. They do not send real traffic.",
+      "These inputs configure one deterministic simulation. The default starts without resilience mechanisms so playback evidence can guide the next change. No real traffic is sent.",
     controlsItems: [
       [
         "Traffic scenario",
@@ -68,7 +69,10 @@ const en = {
       ],
       ["Seed", "Reproduces the same generated latencies and outcomes."],
       ["Cache", "Lets browse requests avoid an inventory call on a hit."],
-      ["Timeout", "Stops a dependency attempt after the selected duration."],
+      [
+        "Timeout",
+        "Stops a dependency attempt after the selected duration. The 5,000 ms default acts as the unprotected lab ceiling.",
+      ],
       [
         "Bounded retries",
         "Repeats a failed dependency attempt up to this limit.",
@@ -262,6 +266,7 @@ const es = {
   traffic: "Escenario de tráfico",
   scaling: "Escalado de capacidad",
   maxInstances: "Máximo de instancias horizontales",
+  noTimeout: "Sin protección de timeout — 5.000 ms",
   seed: "Semilla",
   run: "Ejecutar simulación",
   playback: {
@@ -291,7 +296,7 @@ const es = {
     close: "Cerrar",
     controlsTitle: "Acerca de los controles",
     controlsIntro:
-      "Estas entradas configuran una simulación determinista. No envían tráfico real.",
+      "Estas entradas configuran una simulación determinista. El estado inicial no activa mecanismos de resiliencia para que la evidencia del playback guíe el siguiente cambio. No envían tráfico real.",
     controlsItems: [
       [
         "Escenario de tráfico",
@@ -316,7 +321,7 @@ const es = {
       ],
       [
         "Timeout",
-        "Detiene un intento de dependencia al superar la duración elegida.",
+        "Detiene un intento de dependencia al superar la duración elegida. Los 5.000 ms iniciales actúan como techo sin protección del laboratorio.",
       ],
       [
         "Reintentos acotados",

@@ -41,6 +41,8 @@ Mechanisms must appear as bubbles anchored over their relevant diagram node or e
 
 The single-run playback must use the complete ten-second window without cutting off the final moving request. Play and Pause share one stateful action, and the four-category flow legend is collapsed by default.
 
+The initial configuration enables no optional resilience mechanisms. Preview and guidance remain hidden before playback evidence exists, then propose one next change from the observed pressure and current controls. Representative playback includes at least four successful Queue-bound orders when the simulation provides them. The legend sits immediately below the request diagram, before service capacity, and circuit-breaker annotations remain on dependency calls rather than Cache.
+
 Traffic scenarios never force errors. Seeded errors and latency arise only when modeled CPU demand exceeds service capacity after rate limiting, cache effects and selected scaling. Horizontal scaling follows the Kubernetes utilization-ratio form with a 70% target and eight-instance cap; vertical scaling is an explicitly simplified 2× allocation. Help links the official model sources.
 
 Rate limiting uses explicit presets: No limit — 1,000/s, Low — 50/s, Medium — 250/s and High — 500/s. Each edge retains at most four recent outcome layers for a two-second virtual window. Success, error, wait and limited layers use separate offset colors whose opacity and width represent weighted recent frequency; they decay without overwriting one another.

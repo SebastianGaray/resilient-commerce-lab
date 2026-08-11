@@ -39,6 +39,16 @@ const text =
           "Un servicio se saturó con una sola instancia. Activa escalado horizontal y define un máximo acorde al presupuesto.",
         capAdvice:
           "El escalado alcanzó su máximo. Reduce la admisión con rate limiting; aumenta el tope solo tras validar capacidad y presupuesto.",
+        rateLimitAdvice:
+          "La demanda aún supera la capacidad. Activa rate limiting para proteger los servicios y rechazar de forma controlada.",
+        circuitAdvice:
+          "Hay fallos repetidos en dependencias. Activa el circuit breaker para cortar llamadas mientras se recuperan.",
+        cacheAdvice:
+          "Inventario está bajo presión. Activa caché para evitar parte de las consultas repetidas.",
+        idempotencyAdvice:
+          "La cola está recibiendo pedidos sin protección de duplicados. Activa idempotencia antes de agregar reintentos de mutaciones.",
+        retryAdvice:
+          "La capacidad conserva margen y quedan fallos aislados. Prueba un reintento acotado con jitter.",
         errorAdvice:
           "Primero reduce presión con capacidad o rate limiting. Mantén reintentos acotados para no amplificar la carga.",
         limitedAdvice:
@@ -67,6 +77,16 @@ const text =
           "A service saturated on one instance. Enable horizontal scaling and set a budget-aware maximum.",
         capAdvice:
           "Scaling reached its maximum. Reduce admission with rate limiting; raise the cap only after capacity and budget validation.",
+        rateLimitAdvice:
+          "Demand still exceeds capacity. Enable rate limiting to protect services and reject work in a controlled way.",
+        circuitAdvice:
+          "Dependencies are failing repeatedly. Enable the circuit breaker to stop calls while they recover.",
+        cacheAdvice:
+          "Inventory is under pressure. Enable the cache to avoid part of the repeated read load.",
+        idempotencyAdvice:
+          "Orders are reaching the queue without duplicate protection. Enable idempotency before retrying mutations.",
+        retryAdvice:
+          "Capacity retains headroom and isolated failures remain. Try one bounded retry with jitter.",
         errorAdvice:
           "Reduce pressure with capacity or rate limiting first. Keep retries bounded so they do not amplify load.",
         limitedAdvice:
@@ -151,6 +171,9 @@ function render(
 
   const customer = document.querySelector<HTMLElement>("[data-customer-state]");
   if (customer) {
+    const hasEvidence =
+      virtualMs > 0 && (m.completed > 0 || m.limited > 0 || m.errorRate > 0);
+    customer.hidden = !hasEvidence;
     const state =
       m.limited > 0
         ? "limited"
@@ -159,8 +182,13 @@ function render(
           : m.p95 > 500
             ? "delayed"
             : "normal";
-    customer.dataset.state = state;
-    customer.innerHTML = `<span class="status">${state}</span><strong>${state === "normal" ? text.normal : state === "delayed" ? text.delayed : state === "limited" ? text.limited : text.unavailable}</strong><small>${m.completed} ${text.request}${m.completed === 1 ? "" : "s"} · ${m.dependencyRequests} ${text.attempts}</small>`;
+    if (hasEvidence) {
+      customer.dataset.state = state;
+      customer.innerHTML = `<span class="status">${state}</span><strong>${state === "normal" ? text.normal : state === "delayed" ? text.delayed : state === "limited" ? text.limited : text.unavailable}</strong><small>${m.completed} ${text.request}${m.completed === 1 ? "" : "s"} · ${m.dependencyRequests} ${text.attempts}</small>`;
+    } else {
+      customer.removeAttribute("data-state");
+      customer.replaceChildren();
+    }
   }
 
   const recommendation = document.querySelector<HTMLElement>(
@@ -177,19 +205,36 @@ function render(
           item.state === "saturated" &&
           item.instances >= result.config.maxInstances,
       );
-    const advice =
-      m.errorRate > 0
-        ? atHorizontalCap
+    const inventoryBusy = result.resources.some(
+      (item) => item.service === "inventory" && item.state !== "healthy",
+    );
+    const hasProblem =
+      virtualMs > 0 && (m.errorRate > 0 || m.limited > 0 || m.p95 > 500);
+    const advice = saturated
+      ? result.config.scaling === "none"
+        ? text.scaleAdvice
+        : atHorizontalCap
           ? text.capAdvice
-          : result.config.scaling === "none" && saturated
-            ? text.scaleAdvice
+          : result.config.controls.rateLimit >= 1000
+            ? text.rateLimitAdvice
             : text.errorAdvice
-        : m.limited > 0
-          ? text.limitedAdvice
-          : m.p95 > 500
-            ? text.latencyAdvice
-            : text.stableAdvice;
-    recommendation.innerHTML = `<strong>${text.recommendation}</strong><p>${advice}</p>`;
+      : m.timeouts > 0 && !result.config.controls.circuitBreaker
+        ? text.circuitAdvice
+        : inventoryBusy && !result.config.controls.cache
+          ? text.cacheAdvice
+          : m.queueDepth > 0 && !result.config.controls.idempotency
+            ? text.idempotencyAdvice
+            : m.errorRate > 0 && result.config.controls.retries === 0
+              ? text.retryAdvice
+              : m.limited > 0
+                ? text.limitedAdvice
+                : m.p95 > 500
+                  ? text.latencyAdvice
+                  : text.stableAdvice;
+    recommendation.hidden = !hasProblem;
+    recommendation.innerHTML = hasProblem
+      ? `<strong>${text.recommendation}</strong><p>${advice}</p>`
+      : "";
   }
 
   const comparison = document.querySelector<HTMLElement>("[data-comparison]");

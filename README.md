@@ -7,12 +7,14 @@ Public URL after the first validated deployment: <https://sebastiangaray.github.
 ## Features
 
 - Seeded Low day, Normal day, CyberDay sale and denial-of-service traffic scenarios.
+- An intentionally unprotected default so observed degradation can guide resilience controls one step at a time.
 - CPU/memory pressure with selectable no scaling, capped automatic horizontal scaling, simplified 2× vertical scaling and a relative capacity footprint.
 - Cache, timeout, retry/backoff/jitter, circuit-breaker, rate-limit and idempotency controls.
 - Live topology derived from those controls, with bounded color-coded request-flow playback.
 - Traffic up to 1,000 requests per second, named rate-limit presets, anchored mechanism bubbles, stable recent activity and bilingual contextual help.
 - A single Play/Pause action, full ten-second playback, a compact expandable legend and bounded, decaying outcome paint.
-- Metrics, representative traces, baseline comparison and scenario-aware next-step guidance derived from one run.
+- Representative order sampling that keeps the asynchronous Queue → Worker path visible.
+- Metrics, representative traces, baseline comparison and progressive next-step guidance revealed only by playback evidence.
 - English and Spanish routes, true System/Light/Dark themes, reduced motion and mobile-first layout.
 
 ## Quick start

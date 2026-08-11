@@ -122,7 +122,7 @@ export const deriveTopology = (
     });
   if (config.controls.circuitBreaker)
     annotations.push({
-      target: "order",
+      target: "order-payment",
       label: circuitState,
       state: circuitState === "open" ? "open" : "enabled",
     });
@@ -156,7 +156,16 @@ export function createPlaybackTimeline(
   result: SimulationResult,
   maxRequests = 12,
 ): PlaybackTimeline {
-  const traces = result.traces.slice(0, maxRequests);
+  const queued = result.traces.filter((trace) =>
+    trace.spans.some((span) => span.service === "Queue"),
+  );
+  const preferred = [...queued.slice(0, 4), ...result.traces];
+  const traces = preferred
+    .filter(
+      (trace, index, all) =>
+        all.findIndex((candidate) => candidate.id === trace.id) === index,
+    )
+    .slice(0, maxRequests);
   const events: PlaybackEvent[] = [];
   const spacing = 520;
   traces.forEach((trace, traceIndex) => {
@@ -329,5 +338,9 @@ export const metricsAt = (
     limited: scale(metrics.limited),
     errorRate: Math.round(metrics.errorRate * fraction * 10) / 10,
     cacheHitRatio: fraction === 0 ? 0 : metrics.cacheHitRatio,
+    p50: fraction === 0 ? 0 : metrics.p50,
+    p95: fraction === 0 ? 0 : metrics.p95,
+    p99: fraction === 0 ? 0 : metrics.p99,
+    circuitState: fraction === 0 ? "closed" : metrics.circuitState,
   };
 };
